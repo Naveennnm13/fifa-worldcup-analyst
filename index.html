@@ -203,6 +203,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 /* ── Scrollbar global ── */
 *{scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -408,7 +409,287 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 </div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────
+// ── Chart registry (to destroy before re-render) ─────────────
+const chartRegistry = {};
+
+// ── Render a chart into a container ─────────────────────────
+function renderChart(data, containerId) {
+    const wrap = document.getElementById(containerId);
+    if (!wrap) return;
+    if (chartRegistry[containerId]) {
+        chartRegistry[containerId].destroy();
+    }
+    const canvas = document.createElement('canvas');
+    wrap.innerHTML = '';
+    wrap.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    const baseOpts = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { color: '#e8eaf0', font: { family: 'Inter', size: 11 } } },
+            title: { display: false }
+        },
+        scales: {}
+    };
+
+    let chart;
+    if (data.type === 'bar') {
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{ data: data.values, backgroundColor: data.colors,
+                             borderRadius: 6, borderSkipped: false }]
+            },
+            options: { ...baseOpts,
+                plugins: { ...baseOpts.plugins, legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
+    } else if (data.type === 'bar_h') {
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{ data: data.values, backgroundColor: data.colors,
+                             borderRadius: 4, borderSkipped: false }]
+            },
+            options: { ...baseOpts, indexAxis: 'y',
+                plugins: { ...baseOpts.plugins, legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } }
+                }
+            }
+        });
+    } else if (data.type === 'line') {
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: data.datasets.map(ds => ({
+                    label: ds.label, data: ds.values,
+                    borderColor: ds.color, backgroundColor: ds.color + '22',
+                    tension: 0.4, fill: true, pointRadius: 2
+                }))
+            },
+            options: { ...baseOpts,
+                scales: {
+                    x: { ticks: { color: '#7a8a9a', maxTicksLimit: 6, font: { size: 9 } },
+                         grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
+    } else if (data.type === 'radar') {
+        chart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: data.categories,
+                datasets: data.datasets.map(ds => ({
+                    label: ds.label, data: ds.values,
+                    borderColor: ds.color, backgroundColor: ds.color + '33',
+                    pointBackgroundColor: ds.color, pointRadius: 3
+                }))
+            },
+            options: { ...baseOpts,
+                scales: {
+                    r: {
+                        ticks: { color: '#7a8a9a', backdropColor: 'transparent', font: { size: 9 } },
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        pointLabels: { color: '#e8eaf0', font: { size: 10 } },
+                        suggestedMin: 60, suggestedMax: 95
+                    }
+                }
+            }
+        });
+    }
+    if (chart) chartRegistry[containerId] = chart;
+}
+
+// ── Fetch and show a chart ────────────────────────────────────
+let chartCount = 0;
+async function showChart(endpoint, title) {
+    if (!API_URL) { openModal(); return; }
+    const id = `chart-${++chartCount}`;
+    const card = document.createElement('div');
+    card.className = 'chart-card';
+    card.innerHTML = `
+        <div class="chart-title">${title}</div>
+        <div class="chart-wrap" id="${id}">
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:0.85rem;">
+                Loading chart...
+            </div>
+        </div>`;
+    chatEl.appendChild(card);
+    chatEl.scrollTop = chatEl.scrollHeight;
+
+    try {
+        const r = await fetch(`${API_URL}${endpoint}`,
+            { headers: { 'ngrok-skip-browser-warning': 'true' } });
+        const d = await r.json();
+        if (d.status === 'ok') {
+            renderChart(d, id);
+        } else {
+            document.getElementById(id).innerHTML =
+                `<div style="color:var(--muted);text-align:center;padding:2rem;">No data found.</div>`;
+        }
+    } catch(e) {
+        document.getElementById(id).innerHTML =
+            `<div style="color:#e74c3c;text-align:center;padding:2rem;">Chart failed to load.</div>`;
+    }
+}
+
+// ── Detect if response is chartable & return best chart config ─
+function getChartConfig(text) {
+    const lower = text.toLowerCase();
+
+    // H2H / prediction / match report → H2H bar + radar toggle
+    const h2hMatch = text.match(/([A-Z][a-zA-Z\s]{2,20}?)\s+vs\s+([A-Z][a-zA-Z\s]{2,20})/);
+    if (h2hMatch && (lower.includes('win') || lower.includes('head') ||
+        lower.includes('predict') || lower.includes('match') ||
+        lower.includes('elo') || lower.includes('form') || lower.includes('report'))) {
+        const ta = h2hMatch[1].trim();
+        const tb = h2hMatch[2].trim();
+        return {
+            chartable: true,
+            charts: [
+                { label: 'H2H Record', endpoint: `/chart/h2h/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`,
+                  title: `${ta} vs ${tb} — Head to Head` },
+                { label: 'FIFA Radar', endpoint: `/chart/team-radar/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`,
+                  title: `${ta} vs ${tb} — FIFA Ratings` },
+            ]
+        };
+    }
+
+    // Scorer / goals / hat-trick → bar chart
+    if (lower.includes('scorer') || lower.includes('hat-trick') ||
+        lower.includes('hat trick') || lower.includes('goals') &&
+        (lower.includes('top') || lower.includes('most') || lower.includes('all-time'))) {
+        const teamMatch = text.match(/\bfor ([A-Z][a-zA-Z\s]{2,20})\b/);
+        const team = teamMatch ? teamMatch[1].trim() : 'all';
+        return {
+            chartable: true,
+            charts: [
+                { label: 'View Chart', endpoint: `/chart/top-scorers/${encodeURIComponent(team)}`,
+                  title: team === 'all' ? 'All-Time Top World Cup Scorers' : `${team} — Top WC Scorers` }
+            ]
+        };
+    }
+
+    // Team record / stats / form → line chart
+    if ((lower.includes('record') || lower.includes('form') || lower.includes('win rate') ||
+         lower.includes('stats') || lower.includes('performance')) &&
+        !lower.includes(' vs ')) {
+        const teamWords = text.match(/\b(Brazil|Germany|France|Argentina|Spain|England|Italy|Portugal|Netherlands|Belgium|Croatia|Mexico|Uruguay|Japan|South Korea|United States|Morocco|Senegal|Ghana|Nigeria|Poland|Switzerland|Denmark|Australia|Serbia|Cameroon|Ecuador|Qatar|Canada|Wales|Iran|Tunisia|Saudi Arabia|Costa Rica|Algeria|Ivory Coast|Cameroon|Hungary|Sweden|Romania|Bulgaria|Austria|Greece|Chile|Colombia|Peru|Paraguay|Bolivia|Ecuador)\b/i);
+        if (teamWords) {
+            return {
+                chartable: true,
+                charts: [
+                    { label: 'View Chart', endpoint: `/chart/team-form/${encodeURIComponent(teamWords[0])}`,
+                      title: `${teamWords[0]} — Recent Form` }
+                ]
+            };
+        }
+    }
+
+    // Tournament / goals per edition
+    if ((lower.includes('tournament') || lower.includes('edition') || lower.includes('world cup') &&
+        lower.includes('goals')) && (lower.includes('most') || lower.includes('total') ||
+        lower.includes('highest') || lower.includes('scoring'))) {
+        return {
+            chartable: true,
+            charts: [
+                { label: 'View Chart', endpoint: `/chart/tournament-goals`,
+                  title: 'Total Goals by World Cup Tournament' }
+            ]
+        };
+    }
+
+    return { chartable: false };
+}
+
+// ── Detect and attach single 📊 button if chartable ──────────
+function detectAndShowCharts(text, msgEl) {
+    const config = getChartConfig(text);
+    if (!config.chartable) return;
+
+    // If multiple charts available (e.g. H2H + Radar), cycle through them
+    let currentIdx = 0;
+    const btn = document.createElement('button');
+    btn.className = 'viz-btn';
+    btn.style.marginTop = '0.7rem';
+    btn.style.display   = 'block';
+
+    function updateLabel() {
+        btn.textContent = `📊 ${config.charts[currentIdx].label}`;
+    }
+    updateLabel();
+
+    // Track chart card so we can replace it on toggle
+    let chartCard = null;
+
+    btn.onclick = async () => {
+        const cfg = config.charts[currentIdx];
+
+        // If multiple charts, rotate index for next click
+        if (config.charts.length > 1) {
+            currentIdx = (currentIdx + 1) % config.charts.length;
+            updateLabel();
+        }
+
+        // Remove previous chart card if exists
+        if (chartCard) { chartCard.remove(); chartCard = null; }
+
+        // Create and insert chart card after the bubble
+        const id = `chart-${++chartCount}`;
+        chartCard = document.createElement('div');
+        chartCard.className = 'chart-card';
+        chartCard.innerHTML = `
+            <div class="chart-title">${cfg.title}</div>
+            <div class="chart-wrap" id="${id}">
+                <div style="display:flex;align-items:center;justify-content:center;
+                    height:100%;color:var(--muted);font-size:0.85rem;">
+                    Loading chart...
+                </div>
+            </div>
+            <div style="text-align:right;margin-top:0.4rem;">
+                <button onclick="this.closest('.chart-card').remove()"
+                    style="background:none;border:none;color:var(--muted);
+                    font-size:0.75rem;cursor:pointer;">✕ Close</button>
+            </div>`;
+
+        // Insert chart card right after the message bubble's parent
+        const msgDiv = msgEl.closest('.msg') || msgEl.parentElement;
+        msgDiv.parentElement.insertBefore(chartCard, msgDiv.nextSibling);
+        chatEl.scrollTop = chatEl.scrollHeight;
+
+        try {
+            const r = await fetch(`${API_URL}${cfg.endpoint}`,
+                { headers: { 'ngrok-skip-browser-warning': 'true' } });
+            const d = await r.json();
+            if (d.status === 'ok') {
+                renderChart(d, id);
+            } else {
+                document.getElementById(id).innerHTML =
+                    `<div style="color:var(--muted);text-align:center;padding:2rem;font-size:0.85rem;">
+                        No chart data available for this query.</div>`;
+            }
+        } catch(e) {
+            document.getElementById(id).innerHTML =
+                `<div style="color:#e74c3c;text-align:center;padding:2rem;font-size:0.85rem;">
+                    Failed to load chart. Check API connection.</div>`;
+        }
+    };
+
+    msgEl.appendChild(btn);
+}
+
+
 let API_URL = localStorage.getItem('wc_api_url') || '';
 const chatEl = document.getElementById('chat-messages');
 const inputEl = document.getElementById('msg-input');
@@ -501,6 +782,8 @@ function appendMsg(role, text){
   div.appendChild(ava);
   div.appendChild(bub);
   chatEl.appendChild(div);
+  // Add visualisation buttons for bot messages
+  if (role === 'bot') detectAndShowCharts(text, bub);
   chatEl.scrollTop = chatEl.scrollHeight;
   return div;
 }
