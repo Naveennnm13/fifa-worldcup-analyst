@@ -548,66 +548,51 @@ async function showChart(endpoint, title) {
 function getChartConfig(text) {
     const lower = text.toLowerCase();
 
-    // H2H / prediction / match report → H2H bar + radar toggle
-    const h2hMatch = text.match(/([A-Z][a-zA-Z\s]{2,20}?)\s+vs\s+([A-Z][a-zA-Z\s]{2,20})/);
+    // H2H / prediction / match report
+    const h2hMatch = text.match(/([A-Z][a-zA-Z\s]{2,20}?)\s+vs\.?\s+([A-Z][a-zA-Z\s]{2,20})/);
     if (h2hMatch && (lower.includes('win') || lower.includes('head') ||
-        lower.includes('predict') || lower.includes('match') ||
-        lower.includes('elo') || lower.includes('form') || lower.includes('report'))) {
-        const ta = h2hMatch[1].trim();
-        const tb = h2hMatch[2].trim();
-        return {
-            chartable: true,
-            charts: [
-                { label: 'H2H Record', endpoint: `/chart/h2h/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`,
-                  title: `${ta} vs ${tb} — Head to Head` },
-                { label: 'FIFA Radar', endpoint: `/chart/team-radar/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`,
-                  title: `${ta} vs ${tb} — FIFA Ratings` },
-            ]
-        };
+        lower.includes('predict') || lower.includes('elo') ||
+        lower.includes('form') || lower.includes('report') ||
+        lower.includes('match preview'))) {
+        const ta = h2hMatch[1].trim(), tb = h2hMatch[2].trim();
+        return { chartable: true, charts: [
+            { label: 'H2H Record', endpoint: `/chart/h2h/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`, title: `${ta} vs ${tb} — Head to Head` },
+            { label: 'FIFA Radar', endpoint: `/chart/team-radar/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`, title: `${ta} vs ${tb} — FIFA Ratings` },
+        ]};
     }
 
-    // Scorer / goals / hat-trick → bar chart
-    if (lower.includes('scorer') || lower.includes('hat-trick') ||
-        lower.includes('hat trick') || lower.includes('goals') &&
-        (lower.includes('top') || lower.includes('most') || lower.includes('all-time'))) {
+    // Top scorers ONLY — must say "top scorer" or "all-time" explicitly, not just "goals"
+    if ((lower.includes('top scorer') || lower.includes('all-time') || lower.includes('most goals') ||
+         lower.includes('leading scorer')) && !lower.includes('hat')) {
         const teamMatch = text.match(/\bfor ([A-Z][a-zA-Z\s]{2,20})\b/);
         const team = teamMatch ? teamMatch[1].trim() : 'all';
-        return {
-            chartable: true,
-            charts: [
-                { label: 'View Chart', endpoint: `/chart/top-scorers/${encodeURIComponent(team)}`,
-                  title: team === 'all' ? 'All-Time Top World Cup Scorers' : `${team} — Top WC Scorers` }
-            ]
-        };
+        return { chartable: true, charts: [
+            { label: 'View Chart', endpoint: `/chart/top-scorers/${encodeURIComponent(team)}`,
+              title: team === 'all' ? 'All-Time Top World Cup Scorers' : `${team} — Top WC Scorers` }
+        ]};
     }
 
-    // Team record / stats / form → line chart
-    if ((lower.includes('record') || lower.includes('form') || lower.includes('win rate') ||
-         lower.includes('stats') || lower.includes('performance')) &&
-        !lower.includes(' vs ')) {
-        const teamWords = text.match(/\b(Brazil|Germany|France|Argentina|Spain|England|Italy|Portugal|Netherlands|Belgium|Croatia|Mexico|Uruguay|Japan|South Korea|United States|Morocco|Senegal|Ghana|Nigeria|Poland|Switzerland|Denmark|Australia|Serbia|Cameroon|Ecuador|Qatar|Canada|Wales|Iran|Tunisia|Saudi Arabia|Costa Rica|Algeria|Ivory Coast|Cameroon|Hungary|Sweden|Romania|Bulgaria|Austria|Greece|Chile|Colombia|Peru|Paraguay|Bolivia|Ecuador)\b/i);
+    // Team record / form — must be about a specific team, no vs
+    if ((lower.includes('record') || lower.includes('recent form') || lower.includes('win rate') ||
+         lower.includes('world cup stats') || lower.includes('world cup record')) &&
+        !lower.includes(' vs ') && !lower.includes('hat')) {
+        const teamWords = text.match(/\b(Brazil|Germany|France|Argentina|Spain|England|Italy|Portugal|Netherlands|Belgium|Croatia|Mexico|Uruguay|Japan|South Korea|United States|Morocco|Senegal|Ghana|Nigeria|Poland|Switzerland|Denmark|Australia|Serbia|Cameroon|Ecuador|Qatar|Canada|Wales|Iran|Tunisia|Saudi Arabia|Costa Rica|Algeria|Hungary|Sweden|Romania|Chile|Colombia|Peru)\b/i);
         if (teamWords) {
-            return {
-                chartable: true,
-                charts: [
-                    { label: 'View Chart', endpoint: `/chart/team-form/${encodeURIComponent(teamWords[0])}`,
-                      title: `${teamWords[0]} — Recent Form` }
-                ]
-            };
+            return { chartable: true, charts: [
+                { label: 'View Chart', endpoint: `/chart/team-form/${encodeURIComponent(teamWords[0])}`,
+                  title: `${teamWords[0]} — Recent Form` }
+            ]};
         }
     }
 
-    // Tournament / goals per edition
-    if ((lower.includes('tournament') || lower.includes('edition') || lower.includes('world cup') &&
-        lower.includes('goals')) && (lower.includes('most') || lower.includes('total') ||
-        lower.includes('highest') || lower.includes('scoring'))) {
-        return {
-            chartable: true,
-            charts: [
-                { label: 'View Chart', endpoint: `/chart/tournament-goals`,
-                  title: 'Total Goals by World Cup Tournament' }
-            ]
-        };
+    // Tournament goals — must explicitly mention tournament + goals/scoring
+    if ((lower.includes('tournament') || lower.includes('edition')) &&
+        (lower.includes('most goals') || lower.includes('total goals') ||
+         lower.includes('highest scoring') || lower.includes('goals per'))) {
+        return { chartable: true, charts: [
+            { label: 'View Chart', endpoint: `/chart/tournament-goals`,
+              title: 'Total Goals by World Cup Tournament' }
+        ]};
     }
 
     return { chartable: false };
