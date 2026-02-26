@@ -4,51 +4,41 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Personal FIFA World Cup Analyst</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
 *{margin:0;padding:0;box-sizing:border-box;}
-
 :root{
   --gold:#c9a84c;--gold2:#f0c060;--green:#1a472a;--green2:#2d6a4f;
   --navy:#0a0e1a;--navy2:#0f1628;--white:#ffffff;
   --glass:rgba(255,255,255,0.06);--glass2:rgba(255,255,255,0.03);
   --border:rgba(255,255,255,0.08);--text:#e8eaf0;--muted:#7a8a9a;
 }
-
 html,body{height:100%;background:var(--navy);color:var(--text);
   font-family:'Inter',sans-serif;overflow:hidden;}
 
-/* ── Canvas background ── */
-#bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
-
-/* ── Floating orbs ── */
 .orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:drift 20s ease-in-out infinite;}
 .orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(26,71,42,0.4),transparent);top:-100px;left:-100px;animation-delay:0s;}
 .orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.15),transparent);bottom:-50px;right:-50px;animation-delay:-7s;}
 .orb3{width:300px;height:300px;background:radial-gradient(circle,rgba(10,50,100,0.3),transparent);top:40%;left:40%;animation-delay:-14s;}
 @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-20px) scale(1.05);}66%{transform:translate(-20px,30px) scale(0.95);}}
 
-/* ── Layout ── */
-#app{position:relative;z-index:1;display:grid;grid-template-columns:280px 1fr 260px;grid-template-rows:72px 1fr;height:100vh;gap:0;}
+#app{position:relative;z-index:1;display:grid;grid-template-columns:280px 1fr 260px;grid-template-rows:72px 1fr;height:100vh;}
 
-/* ── Header ── */
 header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
   padding:0 2rem;border-bottom:1px solid var(--border);
   background:rgba(10,14,26,0.8);backdrop-filter:blur(20px);}
 .logo{display:flex;align-items:center;gap:12px;}
-.logo-ball{width:42px;height:42px;position:relative;}
-.logo-ball svg{width:100%;height:100%;animation:spin3d 8s linear infinite;}
-@keyframes spin3d{from{transform:rotateY(0deg);}to{transform:rotateY(360deg);}}
+.logo-ball{width:42px;height:42px;}
+.logo-ball svg{width:100%;height:100%;animation:spin-slow 12s linear infinite;}
+@keyframes spin-slow{from{transform:rotateZ(0deg);}to{transform:rotateZ(360deg);}}
 .logo-text h1{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;
   color:var(--gold);letter-spacing:2px;line-height:1;}
 .logo-text p{font-size:.68rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
-.header-center{display:flex;gap:8px;}
 .status-pill{display:flex;align-items:center;gap:6px;padding:4px 12px;
-  background:var(--glass);border:1px solid var(--border);border-radius:20px;
-  font-size:.75rem;color:var(--muted);}
-.status-dot{width:7px;height:7px;border-radius:50%;background:#4caf50;
-  animation:pulse-dot 2s ease-in-out infinite;}
+  background:var(--glass);border:1px solid var(--border);border-radius:20px;font-size:.75rem;color:var(--muted);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#f44336;animation:pulse-dot 2s ease-in-out infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(0.8);}}
 .api-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;
   background:var(--glass);border:1px solid var(--gold);border-radius:8px;
@@ -56,7 +46,6 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
   font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .2s;}
 .api-btn:hover{background:rgba(201,168,76,0.15);transform:translateY(-1px);}
 
-/* ── Left sidebar ── */
 #sidebar-left{background:rgba(10,14,26,0.6);backdrop-filter:blur(20px);
   border-right:1px solid var(--border);padding:1.2rem;
   display:flex;flex-direction:column;gap:1rem;overflow-y:auto;}
@@ -64,8 +53,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
   padding:1rem;transition:all .3s;}
 .panel:hover{border-color:rgba(201,168,76,0.2);background:rgba(255,255,255,0.07);}
 .panel-title{font-family:'Rajdhani',sans-serif;font-size:.75rem;font-weight:700;
-  color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:.8rem;
-  display:flex;align-items:center;gap:6px;}
+  color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:.8rem;}
 .team-search{width:100%;padding:8px 12px;background:rgba(255,255,255,0.05);
   border:1px solid var(--border);border-radius:10px;color:var(--text);
   font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:all .2s;}
@@ -92,14 +80,12 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
   font-size:.82rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
 .style-select option{background:var(--navy2);}
 
-/* ── Main chat area ── */
-#main{display:flex;flex-direction:column;overflow:hidden;background:transparent;}
+#main{display:flex;flex-direction:column;overflow:hidden;}
 #chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;
   scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 #chat-messages::-webkit-scrollbar{width:4px;}
 #chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-/* welcome screen */
 .welcome-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;
   height:100%;gap:2rem;text-align:center;padding:2rem;}
 .welcome-ball{width:100px;height:100px;margin:0 auto;animation:float 4s ease-in-out infinite;}
@@ -108,12 +94,11 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
   background:linear-gradient(135deg,var(--gold),var(--white));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .welcome-sub{font-size:.9rem;color:var(--muted);line-height:1.7;max-width:400px;}
-.feature-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:.5rem;}
+.feature-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
 .chip{padding:6px 14px;background:var(--glass);border:1px solid var(--border);
   border-radius:20px;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .2s;}
 .chip:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
 
-/* messages */
 .msg{display:flex;gap:10px;animation:slide-in .3s ease;}
 @keyframes slide-in{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .msg.user{flex-direction:row-reverse;}
@@ -122,22 +107,34 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 .avatar.bot{background:linear-gradient(135deg,var(--gold),#a07830);
   box-shadow:0 4px 15px rgba(201,168,76,0.3);}
 .avatar.user{background:linear-gradient(135deg,var(--green),var(--green2));}
-.bubble{max-width:72%;padding:.85rem 1.1rem;border-radius:4px 16px 16px 16px;
-  font-size:.88rem;line-height:1.65;position:relative;}
+.bubble{max-width:72%;padding:.85rem 1.1rem;font-size:.88rem;line-height:1.65;position:relative;}
 .bubble.bot{background:rgba(255,255,255,0.06);border:1px solid var(--border);
   border-radius:4px 16px 16px 16px;
   box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.05);}
 .bubble.user{background:linear-gradient(135deg,var(--green),var(--green2));
   border-radius:16px 4px 16px 16px;color:#fff;
   box-shadow:0 8px 32px rgba(26,71,42,0.3);}
-.typing{display:flex;gap:4px;align-items:center;padding:1rem;}
+.typing{display:flex;gap:4px;align-items:center;padding:.5rem 0;}
 .dot{width:7px;height:7px;background:var(--gold);border-radius:50%;
   animation:bounce .8s ease-in-out infinite;}
 .dot:nth-child(2){animation-delay:.15s;}
 .dot:nth-child(3){animation-delay:.3s;}
 @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
 
-/* ── Input area ── */
+.chart-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:16px;padding:1rem;margin-top:.8rem;
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);}
+.chart-title{font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;
+  color:var(--gold);letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:.8rem;text-align:center;}
+.chart-wrap{position:relative;height:220px;}
+.viz-btn{display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;background:rgba(201,168,76,0.1);
+  border:1px solid rgba(201,168,76,0.3);border-radius:20px;
+  color:var(--gold);font-size:.78rem;cursor:pointer;
+  transition:all .2s;margin-top:.7rem;font-family:'Inter',sans-serif;}
+.viz-btn:hover{background:rgba(201,168,76,0.2);transform:translateY(-1px);}
+
 #input-area{padding:1rem 1.5rem;border-top:1px solid var(--border);
   background:rgba(10,14,26,0.8);backdrop-filter:blur(20px);}
 .input-wrap{display:flex;gap:10px;align-items:flex-end;
@@ -157,7 +154,6 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 .send-btn svg{width:18px;height:18px;}
 .input-hint{font-size:.72rem;color:var(--muted);margin-top:6px;text-align:center;}
 
-/* ── Right sidebar ── */
 #sidebar-right{background:rgba(10,14,26,0.6);backdrop-filter:blur(20px);
   border-left:1px solid var(--border);padding:1.2rem;
   display:flex;flex-direction:column;gap:1rem;overflow-y:auto;}
@@ -173,7 +169,6 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 .match-tag{font-size:.7rem;color:var(--muted);text-align:center;margin-top:6px;
   padding:4px 8px;background:var(--glass2);border-radius:6px;}
 
-/* ── API modal ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
   z-index:100;display:none;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
@@ -194,40 +189,31 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 .modal-cancel{padding:10px 20px;background:var(--glass);border:1px solid var(--border);
   border-radius:10px;color:var(--muted);font-family:'Inter',sans-serif;
   font-size:.88rem;cursor:pointer;transition:all .2s;}
-.modal-cancel:hover{border-color:var(--border);color:var(--text);}
-
-/* ── 3D Ball SVG ── */
-.ball-3d{animation:spin-slow 12s linear infinite;}
-@keyframes spin-slow{from{transform:rotateZ(0deg);}to{transform:rotateZ(360deg);}}
-
-/* ── Scrollbar global ── */
+.modal-cancel:hover{color:var(--text);}
 *{scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-<!-- Orbs -->
 <div class="orb orb1"></div>
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
-<!-- App -->
 <div id="app">
 
   <!-- Header -->
   <header>
     <div class="logo">
       <div class="logo-ball">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="ball-3d">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <radialGradient id="ballGrad" cx="35%" cy="35%">
+            <radialGradient id="bg" cx="35%" cy="35%">
               <stop offset="0%" stop-color="#ffffff"/>
               <stop offset="60%" stop-color="#c0c0c0"/>
               <stop offset="100%" stop-color="#505050"/>
             </radialGradient>
           </defs>
-          <circle cx="50" cy="50" r="46" fill="url(#ballGrad)" stroke="#333" stroke-width="1"/>
+          <circle cx="50" cy="50" r="46" fill="url(#bg)" stroke="#333" stroke-width="1"/>
           <polygon points="50,20 62,35 58,52 42,52 38,35" fill="#1a1a1a" opacity="0.85"/>
           <polygon points="50,20 38,35 20,30 18,14 34,8" fill="#1a1a1a" opacity="0.85"/>
           <polygon points="50,20 62,35 78,28 80,12 64,6" fill="#1a1a1a" opacity="0.85"/>
@@ -242,23 +228,22 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         <p>Powered by LangChain · RAG · FAISS · GPT-3.5</p>
       </div>
     </div>
-    <div class="header-center">
-      <div class="status-pill">
-        <div class="status-dot" id="status-dot"></div>
-        <span id="status-text">Connecting...</span>
-      </div>
+    <div class="status-pill">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Connecting...</span>
     </div>
     <button class="api-btn" onclick="openModal()">⚙ Set API URL</button>
   </header>
 
   <!-- Left Sidebar -->
   <div id="sidebar-left">
-
     <div class="panel">
       <div class="panel-title">📊 Team Stats</div>
-      <input class="team-search" id="team-input" type="text" placeholder="Enter team name..." onkeydown="if(event.key==='Enter')loadStats()"/>
+      <input class="team-search" id="team-input" type="text"
+        placeholder="Enter team name..."
+        onkeydown="if(event.key==='Enter')loadStats()"/>
       <button class="load-stats-btn" onclick="loadStats()">Load Stats</button>
-      <div class="stats-grid" id="stats-grid">
+      <div class="stats-grid">
         <div class="stat-box"><div class="stat-num" id="s-matches">–</div><div class="stat-lbl">Matches</div></div>
         <div class="stat-box"><div class="stat-num" id="s-wins">–</div><div class="stat-lbl">Wins</div></div>
         <div class="stat-box"><div class="stat-num" id="s-wr">–</div><div class="stat-lbl">Win %</div></div>
@@ -283,12 +268,11 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         <button class="quick-btn" onclick="quickSend('Predict the match: Brazil vs France')">⚽ Brazil vs France</button>
         <button class="quick-btn" onclick="quickSend('Predict the match: Germany vs Argentina')">⚽ Germany vs Argentina</button>
         <button class="quick-btn" onclick="quickSend('Predict the match: England vs Spain')">⚽ England vs Spain</button>
-        <button class="quick-btn" onclick="quickSend('Who are the top World Cup scorers of all time?')">🏆 All-time Top Scorers</button>
+        <button class="quick-btn" onclick="quickSend('Who are the top goalscorers in World Cup history of all time?')">🏆 All-time Top Scorers</button>
         <button class="quick-btn" onclick="quickSend('Which team has the best World Cup win rate?')">📈 Best Win Rate</button>
         <button class="quick-btn" onclick="quickSend('Tell me about the 2014 World Cup final')">📋 2014 WC Final</button>
       </div>
     </div>
-
   </div>
 
   <!-- Main Chat -->
@@ -323,12 +307,16 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         </div>
       </div>
     </div>
+
     <div id="input-area">
       <div class="input-wrap">
-        <textarea id="msg-input" rows="1" placeholder="Ask about World Cup history, request a match prediction, or explore team stats..."></textarea>
+        <textarea id="msg-input" rows="1"
+          placeholder="Ask about World Cup history, request a match prediction, or explore team stats..."></textarea>
         <button class="send-btn" onclick="sendMessage()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
         </button>
       </div>
@@ -338,7 +326,6 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 
   <!-- Right Sidebar -->
   <div id="sidebar-right">
-
     <div class="panel">
       <div class="panel-title">🔮 Featured Predictions</div>
       <div style="display:flex;flex-direction:column;gap:8px;">
@@ -386,12 +373,12 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         <div>🎮 FIFA Player Statistics</div>
         <div>📈 Rolling Form Metrics</div>
         <div>🥅 Penalty Shootout Records</div>
-        <div style="margin-top:.6rem;font-size:.7rem;color:#4a5a6a;border-top:1px solid var(--border);padding-top:.6rem;">
+        <div style="margin-top:.6rem;font-size:.7rem;color:#4a5a6a;
+          border-top:1px solid var(--border);padding-top:.6rem;">
           ⚠️ Educational use only. Not professional sports analytics advice.
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -399,8 +386,8 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h2>⚙ Configure API</h2>
-    <p>Paste your ngrok URL from Colab (Block 6B output) here. Update this each time you restart your Colab session.</p>
-    <input type="text" id="api-url-input" placeholder="https://xxxx-xx-xx-xx.ngrok-free.app"/>
+    <p>Paste your ngrok URL from Colab Block 6B output. Update this each time you restart your Colab session.</p>
+    <input type="text" id="api-url-input" placeholder="https://xxxx-xx-xx.ngrok-free.app"/>
     <div class="modal-btns">
       <button class="modal-save" onclick="saveApiUrl()">Save & Connect</button>
       <button class="modal-cancel" onclick="closeModal()">Cancel</button>
@@ -409,276 +396,13 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 </div>
 
 <script>
-// ── Chart registry (to destroy before re-render) ─────────────
-const chartRegistry = {};
-
-// ── Render a chart into a container ─────────────────────────
-function renderChart(data, containerId) {
-    const wrap = document.getElementById(containerId);
-    if (!wrap) return;
-    if (chartRegistry[containerId]) {
-        chartRegistry[containerId].destroy();
-    }
-    const canvas = document.createElement('canvas');
-    wrap.innerHTML = '';
-    wrap.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-
-    const baseOpts = {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-            legend: { labels: { color: '#e8eaf0', font: { family: 'Inter', size: 11 } } },
-            title: { display: false }
-        },
-        scales: {}
-    };
-
-    let chart;
-    if (data.type === 'bar') {
-        chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.labels,
-                datasets: [{ data: data.values, backgroundColor: data.colors,
-                             borderRadius: 6, borderSkipped: false }]
-            },
-            options: { ...baseOpts,
-                plugins: { ...baseOpts.plugins, legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                }
-            }
-        });
-    } else if (data.type === 'bar_h') {
-        chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.labels,
-                datasets: [{ data: data.values, backgroundColor: data.colors,
-                             borderRadius: 4, borderSkipped: false }]
-            },
-            options: { ...baseOpts, indexAxis: 'y',
-                plugins: { ...baseOpts.plugins, legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } }
-                }
-            }
-        });
-    } else if (data.type === 'line') {
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.labels,
-                datasets: data.datasets.map(ds => ({
-                    label: ds.label, data: ds.values,
-                    borderColor: ds.color, backgroundColor: ds.color + '22',
-                    tension: 0.4, fill: true, pointRadius: 2
-                }))
-            },
-            options: { ...baseOpts,
-                scales: {
-                    x: { ticks: { color: '#7a8a9a', maxTicksLimit: 6, font: { size: 9 } },
-                         grid: { color: 'rgba(255,255,255,0.05)' } },
-                    y: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                }
-            }
-        });
-    } else if (data.type === 'radar') {
-        chart = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: data.categories,
-                datasets: data.datasets.map(ds => ({
-                    label: ds.label, data: ds.values,
-                    borderColor: ds.color, backgroundColor: ds.color + '33',
-                    pointBackgroundColor: ds.color, pointRadius: 3
-                }))
-            },
-            options: { ...baseOpts,
-                scales: {
-                    r: {
-                        ticks: { color: '#7a8a9a', backdropColor: 'transparent', font: { size: 9 } },
-                        grid: { color: 'rgba(255,255,255,0.1)' },
-                        pointLabels: { color: '#e8eaf0', font: { size: 10 } },
-                        suggestedMin: 60, suggestedMax: 95
-                    }
-                }
-            }
-        });
-    }
-    if (chart) chartRegistry[containerId] = chart;
-}
-
-// ── Fetch and show a chart ────────────────────────────────────
-let chartCount = 0;
-async function showChart(endpoint, title) {
-    if (!API_URL) { openModal(); return; }
-    const id = `chart-${++chartCount}`;
-    const card = document.createElement('div');
-    card.className = 'chart-card';
-    card.innerHTML = `
-        <div class="chart-title">${title}</div>
-        <div class="chart-wrap" id="${id}">
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:0.85rem;">
-                Loading chart...
-            </div>
-        </div>`;
-    chatEl.appendChild(card);
-    chatEl.scrollTop = chatEl.scrollHeight;
-
-    try {
-        const r = await fetch(`${API_URL}${endpoint}`,
-            { headers: { 'ngrok-skip-browser-warning': 'true' } });
-        const d = await r.json();
-        if (d.status === 'ok') {
-            renderChart(d, id);
-        } else {
-            document.getElementById(id).innerHTML =
-                `<div style="color:var(--muted);text-align:center;padding:2rem;">No data found.</div>`;
-        }
-    } catch(e) {
-        document.getElementById(id).innerHTML =
-            `<div style="color:#e74c3c;text-align:center;padding:2rem;">Chart failed to load.</div>`;
-    }
-}
-
-// ── Detect if response is chartable & return best chart config ─
-function getChartConfig(text) {
-    const lower = text.toLowerCase();
-
-    // H2H / prediction / match report
-    const h2hMatch = text.match(/([A-Z][a-zA-Z\s]{2,20}?)\s+vs\.?\s+([A-Z][a-zA-Z\s]{2,20})/);
-    if (h2hMatch && (lower.includes('win') || lower.includes('head') ||
-        lower.includes('predict') || lower.includes('elo') ||
-        lower.includes('form') || lower.includes('report') ||
-        lower.includes('match preview'))) {
-        const ta = h2hMatch[1].trim(), tb = h2hMatch[2].trim();
-        return { chartable: true, charts: [
-            { label: 'H2H Record', endpoint: `/chart/h2h/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`, title: `${ta} vs ${tb} — Head to Head` },
-            { label: 'FIFA Radar', endpoint: `/chart/team-radar/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`, title: `${ta} vs ${tb} — FIFA Ratings` },
-        ]};
-    }
-
-    // Top scorers ONLY — must say "top scorer" or "all-time" explicitly, not just "goals"
-    if ((lower.includes('top scorer') || lower.includes('all-time') || lower.includes('most goals') ||
-         lower.includes('leading scorer')) && !lower.includes('hat')) {
-        const teamMatch = text.match(/\bfor ([A-Z][a-zA-Z\s]{2,20})\b/);
-        const team = teamMatch ? teamMatch[1].trim() : 'all';
-        return { chartable: true, charts: [
-            { label: 'View Chart', endpoint: `/chart/top-scorers/${encodeURIComponent(team)}`,
-              title: team === 'all' ? 'All-Time Top World Cup Scorers' : `${team} — Top WC Scorers` }
-        ]};
-    }
-
-    // Team record / form — must be about a specific team, no vs
-    if ((lower.includes('record') || lower.includes('recent form') || lower.includes('win rate') ||
-         lower.includes('world cup stats') || lower.includes('world cup record')) &&
-        !lower.includes(' vs ') && !lower.includes('hat')) {
-        const teamWords = text.match(/\b(Brazil|Germany|France|Argentina|Spain|England|Italy|Portugal|Netherlands|Belgium|Croatia|Mexico|Uruguay|Japan|South Korea|United States|Morocco|Senegal|Ghana|Nigeria|Poland|Switzerland|Denmark|Australia|Serbia|Cameroon|Ecuador|Qatar|Canada|Wales|Iran|Tunisia|Saudi Arabia|Costa Rica|Algeria|Hungary|Sweden|Romania|Chile|Colombia|Peru)\b/i);
-        if (teamWords) {
-            return { chartable: true, charts: [
-                { label: 'View Chart', endpoint: `/chart/team-form/${encodeURIComponent(teamWords[0])}`,
-                  title: `${teamWords[0]} — Recent Form` }
-            ]};
-        }
-    }
-
-    // Tournament goals — must explicitly mention tournament + goals/scoring
-    if ((lower.includes('tournament') || lower.includes('edition')) &&
-        (lower.includes('most goals') || lower.includes('total goals') ||
-         lower.includes('highest scoring') || lower.includes('goals per'))) {
-        return { chartable: true, charts: [
-            { label: 'View Chart', endpoint: `/chart/tournament-goals`,
-              title: 'Total Goals by World Cup Tournament' }
-        ]};
-    }
-
-    return { chartable: false };
-}
-
-// ── Detect and attach single 📊 button if chartable ──────────
-function detectAndShowCharts(text, msgEl) {
-    const config = getChartConfig(text);
-    if (!config.chartable) return;
-
-    // If multiple charts available (e.g. H2H + Radar), cycle through them
-    let currentIdx = 0;
-    const btn = document.createElement('button');
-    btn.className = 'viz-btn';
-    btn.style.marginTop = '0.7rem';
-    btn.style.display   = 'block';
-
-    function updateLabel() {
-        btn.textContent = `📊 ${config.charts[currentIdx].label}`;
-    }
-    updateLabel();
-
-    // Track chart card so we can replace it on toggle
-    let chartCard = null;
-
-    btn.onclick = async () => {
-        const cfg = config.charts[currentIdx];
-
-        // If multiple charts, rotate index for next click
-        if (config.charts.length > 1) {
-            currentIdx = (currentIdx + 1) % config.charts.length;
-            updateLabel();
-        }
-
-        // Remove previous chart card if exists
-        if (chartCard) { chartCard.remove(); chartCard = null; }
-
-        // Create and insert chart card after the bubble
-        const id = `chart-${++chartCount}`;
-        chartCard = document.createElement('div');
-        chartCard.className = 'chart-card';
-        chartCard.innerHTML = `
-            <div class="chart-title">${cfg.title}</div>
-            <div class="chart-wrap" id="${id}">
-                <div style="display:flex;align-items:center;justify-content:center;
-                    height:100%;color:var(--muted);font-size:0.85rem;">
-                    Loading chart...
-                </div>
-            </div>
-            <div style="text-align:right;margin-top:0.4rem;">
-                <button onclick="this.closest('.chart-card').remove()"
-                    style="background:none;border:none;color:var(--muted);
-                    font-size:0.75rem;cursor:pointer;">✕ Close</button>
-            </div>`;
-
-        // Insert chart card right after the message bubble's parent
-        const msgDiv = msgEl.closest('.msg') || msgEl.parentElement;
-        msgDiv.parentElement.insertBefore(chartCard, msgDiv.nextSibling);
-        chatEl.scrollTop = chatEl.scrollHeight;
-
-        try {
-            const r = await fetch(`${API_URL}${cfg.endpoint}`,
-                { headers: { 'ngrok-skip-browser-warning': 'true' } });
-            const d = await r.json();
-            if (d.status === 'ok') {
-                renderChart(d, id);
-            } else {
-                document.getElementById(id).innerHTML =
-                    `<div style="color:var(--muted);text-align:center;padding:2rem;font-size:0.85rem;">
-                        No chart data available for this query.</div>`;
-            }
-        } catch(e) {
-            document.getElementById(id).innerHTML =
-                `<div style="color:#e74c3c;text-align:center;padding:2rem;font-size:0.85rem;">
-                    Failed to load chart. Check API connection.</div>`;
-        }
-    };
-
-    msgEl.appendChild(btn);
-}
-
-
+// ── State ─────────────────────────────────────────────────────
 let API_URL = localStorage.getItem('wc_api_url') || '';
-const chatEl = document.getElementById('chat-messages');
+const chatEl  = document.getElementById('chat-messages');
 const inputEl = document.getElementById('msg-input');
 const welcomeEl = document.getElementById('welcome');
+let chartCount = 0;
+const chartRegistry = {};
 
 // ── API Modal ─────────────────────────────────────────────────
 function openModal(){
@@ -697,26 +421,24 @@ function saveApiUrl(){
 
 // ── Health check ──────────────────────────────────────────────
 async function checkHealth(){
-  const dot  = document.getElementById('status-dot');
-  const txt  = document.getElementById('status-text');
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
   if(!API_URL){ dot.style.background='#f44336'; txt.textContent='No API URL'; return; }
   try{
     const r = await fetch(`${API_URL}/health`,{
-      signal:AbortSignal.timeout(8000),
-      headers:{'ngrok-skip-browser-warning':'true'}
+      signal: AbortSignal.timeout(8000),
+      headers: {'ngrok-skip-browser-warning':'true'}
     });
     const d = await r.json();
-    dot.style.background  = '#4caf50';
+    dot.style.background = '#4caf50';
     txt.textContent = `Live · ${d.vectors} vectors`;
   } catch(e){
-    dot.style.background  = '#f44336';
+    dot.style.background = '#f44336';
     txt.textContent = 'API Offline';
   }
 }
 setInterval(checkHealth, 30000);
 checkHealth();
-
-// Auto-prompt modal if no URL saved
 if(!API_URL) setTimeout(openModal, 1200);
 
 // ── Send message ──────────────────────────────────────────────
@@ -724,7 +446,6 @@ async function sendMessage(){
   const text = inputEl.value.trim();
   if(!text) return;
   if(!API_URL){ openModal(); return; }
-
   inputEl.value = '';
   inputEl.style.height = 'auto';
   if(welcomeEl) welcomeEl.style.display = 'none';
@@ -735,14 +456,14 @@ async function sendMessage(){
   try{
     const style = document.getElementById('style-select').value;
     const r = await fetch(`${API_URL}/chat`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
+      method: 'POST',
+      headers: {'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
       body: JSON.stringify({message: text, style}),
       signal: AbortSignal.timeout(60000)
     });
     const d = await r.json();
     typing.remove();
-    appendMsg('bot', d.response || d.error || 'No response received.');
+    appendMsg('bot', d.response || 'No response received.');
   } catch(e){
     typing.remove();
     appendMsg('bot', `⚠️ Could not reach the API. Make sure your Colab session is running and the URL is correct.\n\nError: ${e.message}`);
@@ -767,8 +488,7 @@ function appendMsg(role, text){
   div.appendChild(ava);
   div.appendChild(bub);
   chatEl.appendChild(div);
-  // Add visualisation buttons for bot messages
-  if (role === 'bot') detectAndShowCharts(text, bub);
+  if(role === 'bot') detectAndShowCharts(text, bub);
   chatEl.scrollTop = chatEl.scrollHeight;
   return div;
 }
@@ -794,14 +514,13 @@ function formatText(text){
     .replace(/\n/g,'<br>');
 }
 
-// ── Load team stats ───────────────────────────────────────────
+// ── Team stats ────────────────────────────────────────────────
 async function loadStats(){
   const team = document.getElementById('team-input').value.trim();
   if(!team || !API_URL) return;
   try{
-    const r = await fetch(`${API_URL}/team-stats/${encodeURIComponent(team)}`,{
-      headers:{'ngrok-skip-browser-warning':'true'}
-    });
+    const r = await fetch(`${API_URL}/team-stats/${encodeURIComponent(team)}`,
+      {headers:{'ngrok-skip-browser-warning':'true'}});
     const d = await r.json();
     if(d.status === 'ok'){
       const s = d.data;
@@ -812,18 +531,184 @@ async function loadStats(){
       document.getElementById('s-ga').textContent      = s.goals_against;
       document.getElementById('s-gd').textContent      = (s.goal_diff > 0 ? '+' : '') + s.goal_diff;
     } else {
-      alert(`No World Cup data found for "${team}". Check spelling.`);
+      alert(`No World Cup data found for "${team}". Try the full country name e.g. "United States".`);
     }
   } catch(e){ alert('Could not load stats. Check API connection.'); }
 }
 
-// ── Input auto-resize + Enter to send ────────────────────────
+// ── Chart registry ────────────────────────────────────────────
+function renderChart(data, containerId){
+  const wrap = document.getElementById(containerId);
+  if(!wrap) return;
+  if(chartRegistry[containerId]){ chartRegistry[containerId].destroy(); }
+  const canvas = document.createElement('canvas');
+  wrap.innerHTML = '';
+  wrap.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const baseOpts = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{labels:{color:'#e8eaf0',font:{family:'Inter',size:11}}},
+      title:{display:false}
+    },
+    scales:{}
+  };
+  let chart;
+  if(data.type === 'bar'){
+    chart = new Chart(ctx,{type:'bar',
+      data:{labels:data.labels,datasets:[{data:data.values,backgroundColor:data.colors,borderRadius:6,borderSkipped:false}]},
+      options:{...baseOpts,plugins:{...baseOpts.plugins,legend:{display:false}},
+        scales:{x:{ticks:{color:'#7a8a9a'},grid:{color:'rgba(255,255,255,0.05)'}},
+                y:{ticks:{color:'#7a8a9a'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  } else if(data.type === 'bar_h'){
+    chart = new Chart(ctx,{type:'bar',
+      data:{labels:data.labels,datasets:[{data:data.values,backgroundColor:data.colors,borderRadius:4,borderSkipped:false}]},
+      options:{...baseOpts,indexAxis:'y',plugins:{...baseOpts.plugins,legend:{display:false}},
+        scales:{x:{ticks:{color:'#7a8a9a'},grid:{color:'rgba(255,255,255,0.05)'}},
+                y:{ticks:{color:'#e8eaf0',font:{size:10}},grid:{display:false}}}}});
+  } else if(data.type === 'line'){
+    chart = new Chart(ctx,{type:'line',
+      data:{labels:data.labels,datasets:data.datasets.map(ds=>({
+        label:ds.label,data:ds.values,borderColor:ds.color,
+        backgroundColor:ds.color+'22',tension:0.4,fill:true,pointRadius:2}))},
+      options:{...baseOpts,
+        scales:{x:{ticks:{color:'#7a8a9a',maxTicksLimit:6,font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}},
+                y:{ticks:{color:'#7a8a9a'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  } else if(data.type === 'radar'){
+    chart = new Chart(ctx,{type:'radar',
+      data:{labels:data.categories,datasets:data.datasets.map(ds=>({
+        label:ds.label,data:ds.values,borderColor:ds.color,
+        backgroundColor:ds.color+'33',pointBackgroundColor:ds.color,pointRadius:3}))},
+      options:{...baseOpts,
+        scales:{r:{ticks:{color:'#7a8a9a',backdropColor:'transparent',font:{size:9}},
+          grid:{color:'rgba(255,255,255,0.1)'},
+          pointLabels:{color:'#e8eaf0',font:{size:10}},
+          suggestedMin:60,suggestedMax:95}}}});
+  }
+  if(chart) chartRegistry[containerId] = chart;
+}
+
+// ── Chart config detection ────────────────────────────────────
+function getChartConfig(text){
+  const lower = text.toLowerCase();
+
+  // H2H / prediction / match report
+  const h2hMatch = text.match(/([A-Z][a-zA-Z\s]{2,20}?)\s+vs\.?\s+([A-Z][a-zA-Z\s]{2,20})/);
+  if(h2hMatch && (lower.includes('win') || lower.includes('head') ||
+      lower.includes('predict') || lower.includes('elo') ||
+      lower.includes('form') || lower.includes('report') ||
+      lower.includes('match preview'))){
+    const ta = h2hMatch[1].trim(), tb = h2hMatch[2].trim();
+    return {chartable:true, charts:[
+      {label:'H2H Record', endpoint:`/chart/h2h/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`, title:`${ta} vs ${tb} — Head to Head`},
+      {label:'FIFA Radar',  endpoint:`/chart/team-radar/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`, title:`${ta} vs ${tb} — FIFA Ratings`},
+    ]};
+  }
+
+  // Top scorers — explicit only
+  if((lower.includes('top scorer') || lower.includes('all-time') ||
+      lower.includes('most goals') || lower.includes('leading scorer')) && !lower.includes('hat')){
+    const teamMatch = text.match(/\bfor ([A-Z][a-zA-Z\s]{2,20})\b/);
+    const team = teamMatch ? teamMatch[1].trim() : 'all';
+    return {chartable:true, charts:[
+      {label:'View Chart', endpoint:`/chart/top-scorers/${encodeURIComponent(team)}`,
+       title: team==='all' ? 'All-Time Top World Cup Scorers' : `${team} — Top WC Scorers`}
+    ]};
+  }
+
+  // Team record / form
+  if((lower.includes('record') || lower.includes('recent form') || lower.includes('win rate') ||
+      lower.includes('world cup stats') || lower.includes('world cup record')) &&
+      !lower.includes(' vs ') && !lower.includes('hat')){
+    const teamWords = text.match(/\b(Brazil|Germany|France|Argentina|Spain|England|Italy|Portugal|Netherlands|Belgium|Croatia|Mexico|Uruguay|Japan|South Korea|United States|Morocco|Senegal|Ghana|Nigeria|Poland|Switzerland|Denmark|Australia|Serbia|Cameroon|Ecuador|Qatar|Canada|Wales|Iran|Tunisia|Saudi Arabia|Costa Rica|Algeria|Hungary|Sweden|Romania|Chile|Colombia|Peru)\b/i);
+    if(teamWords){
+      return {chartable:true, charts:[
+        {label:'View Chart', endpoint:`/chart/team-form/${encodeURIComponent(teamWords[0])}`,
+         title:`${teamWords[0]} — Recent Form`}
+      ]};
+    }
+  }
+
+  // Tournament goals
+  if((lower.includes('tournament') || lower.includes('edition')) &&
+     (lower.includes('most goals') || lower.includes('total goals') ||
+      lower.includes('highest scoring') || lower.includes('goals per'))){
+    return {chartable:true, charts:[
+      {label:'View Chart', endpoint:`/chart/tournament-goals`,
+       title:'Total Goals by World Cup Tournament'}
+    ]};
+  }
+
+  return {chartable:false};
+}
+
+// ── Attach single 📊 button if chartable ─────────────────────
+function detectAndShowCharts(text, msgEl){
+  const config = getChartConfig(text);
+  if(!config.chartable) return;
+
+  let currentIdx = 0;
+  const btn = document.createElement('button');
+  btn.className = 'viz-btn';
+
+  function updateLabel(){ btn.textContent = `📊 ${config.charts[currentIdx].label}`; }
+  updateLabel();
+
+  let chartCard = null;
+
+  btn.onclick = async () => {
+    const cfg = config.charts[currentIdx];
+    if(config.charts.length > 1){
+      currentIdx = (currentIdx + 1) % config.charts.length;
+      updateLabel();
+    }
+    if(chartCard){ chartCard.remove(); chartCard = null; }
+
+    const id = `chart-${++chartCount}`;
+    chartCard = document.createElement('div');
+    chartCard.className = 'chart-card';
+    chartCard.innerHTML = `
+      <div class="chart-title">${cfg.title}</div>
+      <div class="chart-wrap" id="${id}">
+        <div style="display:flex;align-items:center;justify-content:center;
+          height:100%;color:var(--muted);font-size:.85rem;">Loading chart...</div>
+      </div>
+      <div style="text-align:right;margin-top:.4rem;">
+        <button onclick="this.closest('.chart-card').remove()"
+          style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;">
+          ✕ Close</button>
+      </div>`;
+
+    const msgDiv = msgEl.closest('.msg') || msgEl.parentElement;
+    msgDiv.parentElement.insertBefore(chartCard, msgDiv.nextSibling);
+    chatEl.scrollTop = chatEl.scrollHeight;
+
+    try{
+      const r = await fetch(`${API_URL}${cfg.endpoint}`,
+        {headers:{'ngrok-skip-browser-warning':'true'}});
+      const d = await r.json();
+      if(d.status === 'ok'){
+        renderChart(d, id);
+      } else {
+        document.getElementById(id).innerHTML =
+          `<div style="color:var(--muted);text-align:center;padding:2rem;font-size:.85rem;">No chart data available.</div>`;
+      }
+    } catch(e){
+      document.getElementById(id).innerHTML =
+        `<div style="color:#e74c3c;text-align:center;padding:2rem;font-size:.85rem;">Failed to load chart.</div>`;
+    }
+  };
+
+  msgEl.appendChild(btn);
+}
+
+// ── Input resize + Enter to send ─────────────────────────────
 inputEl.addEventListener('input', function(){
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 inputEl.addEventListener('keydown', function(e){
-  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
 });
 </script>
 </body>
