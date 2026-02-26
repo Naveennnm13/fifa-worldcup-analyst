@@ -435,7 +435,10 @@ async function checkHealth(){
   const txt  = document.getElementById('status-text');
   if(!API_URL){ dot.style.background='#f44336'; txt.textContent='No API URL'; return; }
   try{
-    const r = await fetch(`${API_URL}/health`,{signal:AbortSignal.timeout(8000)});
+    const r = await fetch(`${API_URL}/health`,{
+      signal:AbortSignal.timeout(8000),
+      headers:{'ngrok-skip-browser-warning':'true'}
+    });
     const d = await r.json();
     dot.style.background  = '#4caf50';
     txt.textContent = `Live · ${d.vectors} vectors`;
@@ -467,7 +470,7 @@ async function sendMessage(){
     const style = document.getElementById('style-select').value;
     const r = await fetch(`${API_URL}/chat`,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
       body: JSON.stringify({message: text, style}),
       signal: AbortSignal.timeout(60000)
     });
@@ -528,7 +531,9 @@ async function loadStats(){
   const team = document.getElementById('team-input').value.trim();
   if(!team || !API_URL) return;
   try{
-    const r = await fetch(`${API_URL}/team-stats/${encodeURIComponent(team)}`);
+    const r = await fetch(`${API_URL}/team-stats/${encodeURIComponent(team)}`,{
+      headers:{'ngrok-skip-browser-warning':'true'}
+    });
     const d = await r.json();
     if(d.status === 'ok'){
       const s = d.data;
