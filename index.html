@@ -161,7 +161,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
     </div>
     <div class="logo-text">
       <h1>PERSONAL FIFA WORLD CUP ANALYST</h1>
-      <p>Powered by LangChain · RAG · FAISS · GPT-3.5</p>
+      <p>Powered by LangChain &middot; RAG &middot; FAISS &middot; GPT-3.5</p>
     </div>
   </div>
   <div class="status-pill"><div class="status-dot" id="status-dot"></div><span id="status-text">Connecting...</span></div>
@@ -320,6 +320,7 @@ var chartSeq = 0;
 var predChart = null;
 var PRED_COLORS = ['#c9a84c', '#3a4a5a', '#2d6a4f'];
 
+/* ── Team alias map ─────────────────────────────────────────── */
 var TEAM_ALIASES = {
   'usa': 'United States', 'us': 'United States', 'usmnt': 'United States',
   'america': 'United States', 'united states of america': 'United States',
@@ -343,12 +344,11 @@ var TEAM_ALIASES = {
   'per': 'Peru', 'hun': 'Hungary', 'rom': 'Romania', 'aut': 'Austria',
   'gre': 'Greece', 'can': 'Canada', 'crc': 'Costa Rica',
   'ksa': 'Saudi Arabia', 'qat': 'Qatar', 'chn': 'China', 'nzl': 'New Zealand',
-  'bih': 'Bosnia and Herzegovina', 'bosnia': 'Bosnia and Herzegovina',
-  'ukr': 'Ukraine'
+  'bih': 'Bosnia and Herzegovina', 'bosnia': 'Bosnia and Herzegovina', 'ukr': 'Ukraine'
 };
 
 function resolveTeam(name) {
-  if (!name) return name;
+  if (!name) { return name; }
   var key = name.trim().toLowerCase();
   return TEAM_ALIASES[key] || name.trim();
 }
@@ -360,13 +360,14 @@ function cleanTeamName(raw) {
 function extractTeams(text) {
   var re = /([A-Za-z][A-Za-z\s]{0,22}?)\s+vs\.?\s+([A-Za-z][A-Za-z\s]{0,22}?)(?=\s*[^A-Za-z]|$)/i;
   var m = text.match(re);
-  if (!m) return null;
+  if (!m) { return null; }
   var tA = resolveTeam(cleanTeamName(m[1].trim()));
   var tB = resolveTeam(cleanTeamName(m[2].trim()));
-  if (!tA || !tB || tA.length < 2 || tB.length < 2) return null;
+  if (!tA || !tB || tA.length < 2 || tB.length < 2) { return null; }
   return { tA: tA, tB: tB };
 }
 
+/* ── Modal ──────────────────────────────────────────────────── */
 function openModal() {
   document.getElementById('api-url-input').value = API_URL;
   document.getElementById('modal').classList.add('open');
@@ -383,30 +384,24 @@ function saveApiUrl() {
   checkHealth();
 }
 
+/* ── Health check ───────────────────────────────────────────── */
 function checkHealth() {
   var dot = document.getElementById('status-dot');
   var txt = document.getElementById('status-text');
   if (!API_URL) { dot.style.background = '#f44336'; txt.textContent = 'No API URL'; return; }
-  fetch(API_URL + '/health', {
-    signal: AbortSignal.timeout(8000),
-    headers: { 'ngrok-skip-browser-warning': 'true' }
-  }).then(function(r) {
-    return r.json();
-  }).then(function(d) {
-    dot.style.background = '#4caf50';
-    txt.textContent = 'Live - ' + d.vectors + ' vectors';
-  }).catch(function() {
-    dot.style.background = '#f44336';
-    txt.textContent = 'API Offline';
-  });
+  fetch(API_URL + '/health', { signal: AbortSignal.timeout(8000), headers: { 'ngrok-skip-browser-warning': 'true' } })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { dot.style.background = '#4caf50'; txt.textContent = 'Live - ' + d.vectors + ' vectors'; })
+    .catch(function() { dot.style.background = '#f44336'; txt.textContent = 'API Offline'; });
 }
 setInterval(checkHealth, 30000);
 checkHealth();
 if (!API_URL) { setTimeout(openModal, 1200); }
 
+/* ── Messaging ──────────────────────────────────────────────── */
 function sendMessage() {
   var text = inputEl.value.trim();
-  if (!text) return;
+  if (!text) { return; }
   if (!API_URL) { openModal(); return; }
   inputEl.value = '';
   inputEl.style.height = 'auto';
@@ -434,10 +429,7 @@ function sendMessage() {
   });
 }
 
-function quickSend(text) {
-  inputEl.value = text;
-  sendMessage();
-}
+function quickSend(text) { inputEl.value = text; sendMessage(); }
 
 function appendMsg(role, text) {
   var div = document.createElement('div');
@@ -466,100 +458,87 @@ function appendTyping() {
 
 function formatText(t) {
   return t
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/\n/g, '<br>');
 }
 
+/* ── Team stats sidebar ─────────────────────────────────────── */
 function loadStats() {
   var team = document.getElementById('team-input').value.trim();
-  if (!team || !API_URL) return;
-  fetch(API_URL + '/team-stats/' + encodeURIComponent(team), {
-    headers: { 'ngrok-skip-browser-warning': 'true' }
-  }).then(function(r) {
-    return r.json();
-  }).then(function(d) {
-    if (d.status === 'ok') {
-      var s = d.data;
-      document.getElementById('s-matches').textContent = s.total;
-      document.getElementById('s-wins').textContent = s.wins;
-      document.getElementById('s-wr').textContent = s.win_pct + '%';
-      document.getElementById('s-gf').textContent = s.goals_for;
-      document.getElementById('s-ga').textContent = s.goals_against;
-      document.getElementById('s-gd').textContent = (s.goal_diff > 0 ? '+' : '') + s.goal_diff;
-    } else {
-      alert('No World Cup data found for "' + team + '". Try the full country name.');
-    }
-  }).catch(function() {
-    alert('Could not load stats. Check API connection.');
-  });
+  if (!team || !API_URL) { return; }
+  fetch(API_URL + '/team-stats/' + encodeURIComponent(team), { headers: { 'ngrok-skip-browser-warning': 'true' } })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.status === 'ok') {
+        var s = d.data;
+        document.getElementById('s-matches').textContent = s.total;
+        document.getElementById('s-wins').textContent = s.wins;
+        document.getElementById('s-wr').textContent = s.win_pct + '%';
+        document.getElementById('s-gf').textContent = s.goals_for;
+        document.getElementById('s-ga').textContent = s.goals_against;
+        document.getElementById('s-gd').textContent = (s.goal_diff > 0 ? '+' : '') + s.goal_diff;
+      } else {
+        alert('No World Cup data found for "' + team + '". Try the full country name.');
+      }
+    }).catch(function() { alert('Could not load stats. Check API connection.'); });
 }
 
+/* ── Chart rendering ────────────────────────────────────────── */
 function safeRenderChart(data, wrapId) {
-  if (chartRegistry[wrapId]) {
-    chartRegistry[wrapId].destroy();
-    delete chartRegistry[wrapId];
-  }
+  if (chartRegistry[wrapId]) { chartRegistry[wrapId].destroy(); delete chartRegistry[wrapId]; }
   var wrap = document.getElementById(wrapId);
-  if (!wrap) return;
+  if (!wrap) { return; }
   var canvas = document.createElement('canvas');
   wrap.innerHTML = '';
   wrap.appendChild(canvas);
   var ctx = canvas.getContext('2d');
-  var basePlugins = { legend: { labels: { color: '#e8eaf0', font: { family: 'Inter', size: 11 } } } };
-  var baseScalesXY = {
-    x: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-    y: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-  };
+  var noLegend = { legend: { display: false } };
+  var gridStyle = { color: 'rgba(255,255,255,0.05)' };
+  var xTicks = { color: '#7a8a9a' };
+  var yTicks = { color: '#7a8a9a' };
   var chart = null;
+
   if (data.type === 'bar') {
-    chart = new Chart(ctx, {
-      type: 'bar',
+    chart = new Chart(ctx, { type: 'bar',
       data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: data.colors, borderRadius: 6, borderSkipped: false }] },
       options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
-        plugins: { legend: { display: false } }, scales: baseScalesXY }
+        plugins: noLegend,
+        scales: { x: { ticks: xTicks, grid: gridStyle }, y: { ticks: yTicks, grid: gridStyle } } }
     });
   } else if (data.type === 'bar_h') {
-    chart = new Chart(ctx, {
-      type: 'bar',
+    chart = new Chart(ctx, { type: 'bar',
       data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: data.colors, borderRadius: 4, borderSkipped: false }] },
       options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, indexAxis: 'y',
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-          y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } }
-        }
-      }
+        plugins: noLegend,
+        scales: { x: { ticks: xTicks, grid: gridStyle }, y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } } } }
     });
   } else if (data.type === 'line') {
-    chart = new Chart(ctx, {
-      type: 'line',
+    chart = new Chart(ctx, { type: 'line',
       data: { labels: data.labels, datasets: data.datasets.map(function(ds) {
         return { label: ds.label, data: ds.values, borderColor: ds.color, backgroundColor: ds.color + '22', tension: 0.4, fill: true, pointRadius: 2 };
       })},
       options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
-        plugins: basePlugins, scales: baseScalesXY }
+        plugins: { legend: { labels: { color: '#e8eaf0', font: { family: 'Inter', size: 11 } } } },
+        scales: { x: { ticks: { color: '#7a8a9a', maxTicksLimit: 6, font: { size: 9 } }, grid: gridStyle }, y: { ticks: yTicks, grid: gridStyle } } }
     });
   } else if (data.type === 'radar') {
-    chart = new Chart(ctx, {
-      type: 'radar',
+    chart = new Chart(ctx, { type: 'radar',
       data: { labels: data.categories, datasets: data.datasets.map(function(ds) {
         return { label: ds.label, data: ds.values, borderColor: ds.color, backgroundColor: ds.color + '33', pointBackgroundColor: ds.color, pointRadius: 3 };
       })},
       options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
-        plugins: basePlugins,
+        plugins: { legend: { labels: { color: '#e8eaf0', font: { family: 'Inter', size: 11 } } } },
         scales: { r: { ticks: { color: '#7a8a9a', backdropColor: 'transparent', font: { size: 9 } },
           grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#e8eaf0', font: { size: 10 } },
-          suggestedMin: 60, suggestedMax: 95 } }
-      }
+          suggestedMin: 60, suggestedMax: 95 } } }
     });
   }
   if (chart) { chartRegistry[wrapId] = chart; }
 }
 
+/* ── Chart button config ────────────────────────────────────── */
 function getChartConfig(userMsg) {
   var u = userMsg.trim();
   var uLow = u.toLowerCase();
@@ -609,29 +588,37 @@ function getChartConfig(userMsg) {
   return { chartable: false };
 }
 
+/* ── Attach chart buttons to bot bubble ─────────────────────── */
 function attachChartBtns(userMsg, bubbleEl, msgDiv) {
   var config = getChartConfig(userMsg);
-  if (!config.chartable) return;
+  if (!config.chartable) { return; }
   var row = document.createElement('div');
   row.className = 'viz-btn-row';
+
   config.charts.forEach(function(cfg) {
     var uid = ++chartSeq;
     var btnId = 'vbtn-' + uid;
     var cardId = 'vcard-' + uid;
     var wrapId = 'vwrap-' + uid;
+
     var btn = document.createElement('button');
     btn.className = 'viz-btn';
     btn.id = btnId;
+
     var labelSpan = document.createElement('span');
     labelSpan.className = 'viz-btn-label';
     labelSpan.textContent = cfg.label;
+
     var tipSpan = document.createElement('span');
     tipSpan.className = 'viz-btn-tip';
     tipSpan.textContent = cfg.title;
+
     btn.appendChild(document.createTextNode('\uD83D\uDCCA '));
     btn.appendChild(labelSpan);
     btn.appendChild(tipSpan);
+
     var isOpen = false;
+
     btn.onclick = function() {
       if (isOpen) {
         var existing = document.getElementById(cardId);
@@ -643,16 +630,21 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
         btn.classList.remove('active');
         return;
       }
+
       isOpen = true;
       btn.classList.add('active');
+
       var card = document.createElement('div');
       card.className = 'chart-card';
       card.id = cardId;
+
       var hdr = document.createElement('div');
       hdr.className = 'chart-hdr';
+
       var titleEl = document.createElement('div');
       titleEl.className = 'chart-title';
       titleEl.textContent = cfg.title;
+
       var closeBtn = document.createElement('button');
       closeBtn.className = 'chart-close';
       closeBtn.textContent = 'Close';
@@ -662,24 +654,29 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
         isOpen = false;
         btn.classList.remove('active');
       };
+
       hdr.appendChild(titleEl);
       hdr.appendChild(closeBtn);
+
       var wrapDiv = document.createElement('div');
       wrapDiv.className = 'chart-wrap';
       wrapDiv.id = wrapId;
       wrapDiv.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:.82rem;">Loading...</div>';
+
       card.appendChild(hdr);
       card.appendChild(wrapDiv);
+
       var anchor = msgDiv;
       var sib = msgDiv.nextElementSibling;
       while (sib && sib.classList && sib.classList.contains('chart-card')) { anchor = sib; sib = sib.nextElementSibling; }
       anchor.insertAdjacentElement('afterend', card);
       chatEl.scrollTop = chatEl.scrollHeight;
+
       fetch(API_URL + cfg.endpoint, { headers: { 'ngrok-skip-browser-warning': 'true' } })
         .then(function(r) { return r.json(); })
         .then(function(d) {
           var wrap = document.getElementById(wrapId);
-          if (!wrap) return;
+          if (!wrap) { return; }
           if (d.status === 'ok') {
             safeRenderChart(d, wrapId);
           } else {
@@ -691,30 +688,37 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
           if (wrap) { wrap.innerHTML = '<div style="color:#e74c3c;text-align:center;padding:2rem;font-size:.82rem;">Failed to load chart.</div>'; }
         });
     };
+
     row.appendChild(btn);
   });
+
   bubbleEl.appendChild(row);
 }
 
-// Donut: fires only when bot response contains actual probability data
+/* ── Prediction donut ───────────────────────────────────────── */
 function tryUpdateDonut(userMsg, botResp) {
-  var hasProbData = /(?:win|chance|probabilit|likelihood|favour|favor|advantage|edge|predict|forecast|lean|favour)[^.]{0,120}?\d{1,3}\s*%/i.test(botResp) ||
-    /\d{1,3}\s*%[^.]{0,80}?(?:win|chance|probabilit|likelihood|favour|favor|advantage|edge)/i.test(botResp);
-  if (!hasProbData) return;
+  var hasVs = /\bvs\.?\b/i.test(userMsg);
+  var isPredictIntent = /\b(predict|h2h|head.to.head|who\s+would\s+win|who\s+will\s+win|match\s+preview|match\s+report|forecast|compar)\b/i.test(userMsg);
+  var isQuickPredict = /^predict(\s+the\s+match)?[\s:]/i.test(userMsg);
+  if (!hasVs || (!isPredictIntent && !isQuickPredict)) { return; }
+
   var teams = extractTeams(userMsg) || extractTeams(botResp);
-  if (!teams) return;
+  if (!teams) { return; }
+
   var pcts = extractProbabilities(botResp, teams.tA, teams.tB);
-  if (pcts) { renderPredDonut(teams.tA, teams.tB, pcts); }
+  if (pcts) {
+    renderPredDonut(teams.tA, teams.tB, pcts);
+  } else {
+    renderPredDonutPending(teams.tA, teams.tB);
+  }
 }
 
 function extractProbabilities(text, tA, tB) {
   var clean = text.replace(/\n/g, ' ');
 
-  function escRe(s) {
-    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-  }
+  function escRe(s) { return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
 
-  var predCtxRe = /win|chance|probabilit|likelihood|favour|favor|advantage|edge|predict|lean|favour/i;
+  var predCtxRe = /win|chance|probabilit|likelihood|favour|favor|advantage|edge|predict|lean/i;
 
   function findTeamPct(team) {
     var esc = escRe(team);
@@ -740,7 +744,8 @@ function extractProbabilities(text, tA, tB) {
     var sections = clean.split(/\.\s+/);
     var bestSection = '';
     var bestScore = 0;
-    for (var si = 0; si < sections.length; si++) {
+    var si;
+    for (si = 0; si < sections.length; si++) {
       var sc = (sections[si].match(/\d{1,3}\s*%/g) || []).length + (predCtxRe.test(sections[si]) ? 2 : 0);
       if (sc > bestScore) { bestScore = sc; bestSection = sections[si]; }
     }
@@ -753,8 +758,9 @@ function extractProbabilities(text, tA, tB) {
       if (n >= 1 && n <= 99) { allPcts.push(n); }
     }
     var found = false;
-    for (var i = 0; i < allPcts.length - 1 && !found; i++) {
-      for (var j = i + 1; j < allPcts.length && !found; j++) {
+    var i, j;
+    for (i = 0; i < allPcts.length - 1 && !found; i++) {
+      for (j = i + 1; j < allPcts.length && !found; j++) {
         var remainder = 100 - allPcts[i] - allPcts[j];
         if (remainder >= 0 && remainder <= 40) {
           if (pA === null) { pA = allPcts[i]; }
@@ -783,59 +789,85 @@ function extractProbabilities(text, tA, tB) {
   return { pA: pA, draw: Math.max(0, 100 - pA - pB), pB: pB };
 }
 
-function renderPredDonut(tA, tB, pcts) {
-  var pA = pcts.pA;
-  var draw = pcts.draw;
-  var pB = pcts.pB;
-  document.getElementById('pred-idle').style.display = 'none';
-  document.getElementById('pred-chart-area').style.display = 'block';
-  document.getElementById('pred-match-label').textContent = tA + ' vs ' + tB;
-  var winner = pA >= pB ? tA : tB;
-  var winPct = Math.max(pA, pB);
-  document.getElementById('pred-center-pct').textContent = winPct + '%';
-  document.getElementById('pred-center-sub').textContent = winner.slice(0, 8).toUpperCase();
-  var legEl = document.getElementById('pred-legend');
-  var rows = [
-    { label: tA, pct: pA, color: PRED_COLORS[0] },
-    { label: 'Draw', pct: draw, color: PRED_COLORS[1] },
-    { label: tB, pct: pB, color: PRED_COLORS[2] }
-  ];
-  legEl.innerHTML = '';
-  for (var ri = 0; ri < rows.length; ri++) {
-    var r = rows[ri];
-    var rowDiv = document.createElement('div');
-    rowDiv.className = 'pred-leg-row';
-    rowDiv.innerHTML = '<div class="pred-leg-dot" style="background:' + r.color + '"></div><div class="pred-leg-name">' + r.label + '</div><div class="pred-leg-pct">' + r.pct + '%</div>';
-    legEl.appendChild(rowDiv);
-  }
+function swapDonutCanvas() {
   if (predChart) { predChart.destroy(); predChart = null; }
   var oldCanvas = document.getElementById('pred-donut');
   var newCanvas = document.createElement('canvas');
   newCanvas.id = 'pred-donut';
   oldCanvas.parentNode.replaceChild(newCanvas, oldCanvas);
+  return newCanvas;
+}
+
+function showPredArea(tA, tB) {
+  document.getElementById('pred-idle').style.display = 'none';
+  document.getElementById('pred-chart-area').style.display = 'block';
+  document.getElementById('pred-match-label').textContent = tA + ' vs ' + tB;
+}
+
+function renderPredDonut(tA, tB, pcts) {
+  var pA = pcts.pA;
+  var draw = pcts.draw;
+  var pB = pcts.pB;
+  showPredArea(tA, tB);
+  var winner = pA >= pB ? tA : tB;
+  document.getElementById('pred-center-pct').textContent = Math.max(pA, pB) + '%';
+  document.getElementById('pred-center-sub').textContent = winner.slice(0, 8).toUpperCase();
+  var legEl = document.getElementById('pred-legend');
+  legEl.innerHTML = '';
+  var rows = [
+    { label: tA, pct: pA, color: PRED_COLORS[0] },
+    { label: 'Draw', pct: draw, color: PRED_COLORS[1] },
+    { label: tB, pct: pB, color: PRED_COLORS[2] }
+  ];
+  for (var ri = 0; ri < rows.length; ri++) {
+    var r = rows[ri];
+    var rowDiv = document.createElement('div');
+    rowDiv.className = 'pred-leg-row';
+    rowDiv.innerHTML = '<div class="pred-leg-dot" style="background:' + r.color + '"></div>' +
+      '<div class="pred-leg-name">' + r.label + '</div>' +
+      '<div class="pred-leg-pct">' + r.pct + '%</div>';
+    legEl.appendChild(rowDiv);
+  }
+  var newCanvas = swapDonutCanvas();
   predChart = new Chart(newCanvas.getContext('2d'), {
     type: 'doughnut',
     data: {
       labels: [tA, 'Draw', tB],
-      datasets: [{ data: [pA, draw, pB], backgroundColor: PRED_COLORS, borderColor: [PRED_COLORS[0] + '88', PRED_COLORS[1] + '88', PRED_COLORS[2] + '88'], borderWidth: 2, hoverOffset: 5 }]
+      datasets: [{ data: [pA, draw, pB],
+        backgroundColor: PRED_COLORS,
+        borderColor: [PRED_COLORS[0] + '88', PRED_COLORS[1] + '88', PRED_COLORS[2] + '88'],
+        borderWidth: 2, hoverOffset: 5 }]
     },
-    options: {
-      responsive: true, maintainAspectRatio: false, cutout: '68%',
+    options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
       animation: { animateRotate: true, duration: 700 },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) { return ctx.label + ': ' + ctx.parsed + '%'; }
-          },
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.parsed + '%'; } },
           backgroundColor: 'rgba(10,14,26,0.9)', titleColor: '#c9a84c',
-          bodyColor: '#e8eaf0', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1
-        }
-      }
-    }
+          bodyColor: '#e8eaf0', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 } } }
   });
 }
 
+function renderPredDonutPending(tA, tB) {
+  showPredArea(tA, tB);
+  document.getElementById('pred-center-pct').textContent = '-';
+  document.getElementById('pred-center-sub').textContent = 'NO DATA';
+  var legEl = document.getElementById('pred-legend');
+  legEl.innerHTML = '<div style="font-size:.7rem;color:var(--muted);text-align:center;padding:.3rem 0;">No probability data in response.</div>';
+  var newCanvas = swapDonutCanvas();
+  predChart = new Chart(newCanvas.getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: [tA, tB],
+      datasets: [{ data: [50, 50],
+        backgroundColor: ['rgba(201,168,76,0.18)', 'rgba(45,106,79,0.18)'],
+        borderColor: ['rgba(201,168,76,0.3)', 'rgba(45,106,79,0.3)'],
+        borderWidth: 1 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
+      animation: { animateRotate: true, duration: 500 },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+  });
+}
+
+/* ── Input handlers ─────────────────────────────────────────── */
 inputEl.addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
