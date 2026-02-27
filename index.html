@@ -11,21 +11,21 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --gold:#c9a84c;--gold2:#f0c060;--green:#1a472a;--green2:#2d6a4f;
-  --navy:#0a0e1a;--navy2:#0f1628;--white:#ffffff;
+  --navy:#0a0e1a;--navy2:#0f1628;
   --glass:rgba(255,255,255,0.06);--glass2:rgba(255,255,255,0.03);
   --border:rgba(255,255,255,0.08);--text:#e8eaf0;--muted:#7a8a9a;
 }
-html,body{height:100%;background:var(--navy);color:var(--text);
-  font-family:'Inter',sans-serif;overflow:hidden;}
+html,body{height:100%;background:var(--navy);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden;}
 
 .orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:drift 20s ease-in-out infinite;}
-.orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(26,71,42,0.4),transparent);top:-100px;left:-100px;animation-delay:0s;}
+.orb1{width:500px;height:500px;background:radial-gradient(circle,rgba(26,71,42,0.4),transparent);top:-100px;left:-100px;}
 .orb2{width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,0.15),transparent);bottom:-50px;right:-50px;animation-delay:-7s;}
 .orb3{width:300px;height:300px;background:radial-gradient(circle,rgba(10,50,100,0.3),transparent);top:40%;left:40%;animation-delay:-14s;}
 @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-20px) scale(1.05);}66%{transform:translate(-20px,30px) scale(0.95);}}
 
 #app{position:relative;z-index:1;display:grid;grid-template-columns:280px 1fr 260px;grid-template-rows:72px 1fr;height:100vh;}
 
+/* ── HEADER ── */
 header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
   padding:0 2rem;border-bottom:1px solid var(--border);
   background:rgba(10,14,26,0.8);backdrop-filter:blur(20px);}
@@ -33,186 +33,144 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 .logo-ball{width:42px;height:42px;}
 .logo-ball svg{width:100%;height:100%;animation:spin-slow 12s linear infinite;}
 @keyframes spin-slow{from{transform:rotateZ(0deg);}to{transform:rotateZ(360deg);}}
-.logo-text h1{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;
-  color:var(--gold);letter-spacing:2px;line-height:1;}
+.logo-text h1{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold);letter-spacing:2px;line-height:1;}
 .logo-text p{font-size:.68rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
-.status-pill{display:flex;align-items:center;gap:6px;padding:4px 12px;
-  background:var(--glass);border:1px solid var(--border);border-radius:20px;font-size:.75rem;color:var(--muted);}
+.status-pill{display:flex;align-items:center;gap:6px;padding:4px 12px;background:var(--glass);border:1px solid var(--border);border-radius:20px;font-size:.75rem;color:var(--muted);}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#f44336;animation:pulse-dot 2s ease-in-out infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(0.8);}}
-.api-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;
-  background:var(--glass);border:1px solid var(--gold);border-radius:8px;
-  color:var(--gold);font-size:.78rem;font-family:'Rajdhani',sans-serif;
-  font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.api-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;background:var(--glass);border:1px solid var(--gold);border-radius:8px;color:var(--gold);font-size:.78rem;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .2s;}
 .api-btn:hover{background:rgba(201,168,76,0.15);transform:translateY(-1px);}
 
-#sidebar-left{background:rgba(10,14,26,0.6);backdrop-filter:blur(20px);
-  border-right:1px solid var(--border);padding:1.2rem;
-  display:flex;flex-direction:column;gap:1rem;overflow-y:auto;}
-.panel{background:var(--glass);border:1px solid var(--border);border-radius:14px;
-  padding:1rem;transition:all .3s;}
+/* ── LEFT SIDEBAR ── */
+#sidebar-left{background:rgba(10,14,26,0.6);backdrop-filter:blur(20px);border-right:1px solid var(--border);padding:1.2rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;}
+.panel{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:1rem;transition:border-color .3s,background .3s;}
 .panel:hover{border-color:rgba(201,168,76,0.2);background:rgba(255,255,255,0.07);}
-.panel-title{font-family:'Rajdhani',sans-serif;font-size:.75rem;font-weight:700;
-  color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:.8rem;}
-.team-search{width:100%;padding:8px 12px;background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);border-radius:10px;color:var(--text);
-  font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:all .2s;}
+.panel-title{font-family:'Rajdhani',sans-serif;font-size:.75rem;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:.8rem;}
+.team-search{width:100%;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.85rem;font-family:'Inter',sans-serif;outline:none;transition:all .2s;}
 .team-search:focus{border-color:var(--gold);background:rgba(255,255,255,0.08);}
 .team-search::placeholder{color:var(--muted);}
-.load-stats-btn{width:100%;margin-top:8px;padding:8px;background:linear-gradient(135deg,var(--green),var(--green2));
-  border:none;border-radius:10px;color:var(--gold);font-family:'Rajdhani',sans-serif;
-  font-weight:700;font-size:.85rem;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.load-stats-btn{width:100%;margin-top:8px;padding:8px;background:linear-gradient(135deg,var(--green),var(--green2));border:none;border-radius:10px;color:var(--gold);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:1px;cursor:pointer;transition:all .2s;}
 .load-stats-btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(26,71,42,0.4);}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
-.stat-box{background:var(--glass2);border:1px solid var(--border);border-radius:10px;
-  padding:8px;text-align:center;transition:all .2s;}
+.stat-box{background:var(--glass2);border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center;transition:all .2s;}
 .stat-box:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-2px);}
 .stat-num{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gold);}
 .stat-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
 .quick-btns{display:flex;flex-direction:column;gap:6px;}
-.quick-btn{padding:8px 12px;background:var(--glass2);border:1px solid var(--border);
-  border-radius:10px;color:var(--muted);font-size:.78rem;text-align:left;cursor:pointer;
-  transition:all .2s;font-family:'Inter',sans-serif;}
-.quick-btn:hover{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3);
-  color:var(--gold);transform:translateX(4px);}
-.style-select{width:100%;padding:8px 12px;background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);border-radius:10px;color:var(--text);
-  font-size:.82rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
+.quick-btn{padding:8px 12px;background:var(--glass2);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:.78rem;text-align:left;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;}
+.quick-btn:hover{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3);color:var(--gold);transform:translateX(4px);}
+.style-select{width:100%;padding:8px 12px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.82rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;}
 .style-select option{background:var(--navy2);}
 
+/* ── MAIN CHAT ── */
 #main{display:flex;flex-direction:column;overflow:hidden;}
-#chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;
-  scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+#chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 #chat-messages::-webkit-scrollbar{width:4px;}
 #chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-.welcome-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  height:100%;gap:2rem;text-align:center;padding:2rem;}
+.welcome-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:2rem;text-align:center;padding:2rem;}
 .welcome-ball{width:100px;height:100px;margin:0 auto;animation:float 4s ease-in-out infinite;}
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
-.welcome-title{font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;
-  background:linear-gradient(135deg,var(--gold),var(--white));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.welcome-title{font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;background:linear-gradient(135deg,var(--gold),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .welcome-sub{font-size:.9rem;color:var(--muted);line-height:1.7;max-width:400px;}
 .feature-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
-.chip{padding:6px 14px;background:var(--glass);border:1px solid var(--border);
-  border-radius:20px;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .2s;}
+.chip{padding:6px 14px;background:var(--glass);border:1px solid var(--border);border-radius:20px;font-size:.78rem;color:var(--muted);cursor:pointer;transition:all .2s;}
 .chip:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
 
 .msg{display:flex;gap:10px;animation:slide-in .3s ease;}
 @keyframes slide-in{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .msg.user{flex-direction:row-reverse;}
-.avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;
-  align-items:center;justify-content:center;font-size:1rem;}
-.avatar.bot{background:linear-gradient(135deg,var(--gold),#a07830);
-  box-shadow:0 4px 15px rgba(201,168,76,0.3);}
+.avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.avatar.bot{background:linear-gradient(135deg,var(--gold),#a07830);box-shadow:0 4px 15px rgba(201,168,76,0.3);}
 .avatar.user{background:linear-gradient(135deg,var(--green),var(--green2));}
 .bubble{max-width:72%;padding:.85rem 1.1rem;font-size:.88rem;line-height:1.65;position:relative;}
-.bubble.bot{background:rgba(255,255,255,0.06);border:1px solid var(--border);
-  border-radius:4px 16px 16px 16px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.05);}
-.bubble.user{background:linear-gradient(135deg,var(--green),var(--green2));
-  border-radius:16px 4px 16px 16px;color:#fff;
-  box-shadow:0 8px 32px rgba(26,71,42,0.3);}
+.bubble.bot{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:4px 16px 16px 16px;box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.05);}
+.bubble.user{background:linear-gradient(135deg,var(--green),var(--green2));border-radius:16px 4px 16px 16px;color:#fff;box-shadow:0 8px 32px rgba(26,71,42,0.3);}
 .typing{display:flex;gap:4px;align-items:center;padding:.5rem 0;}
-.dot{width:7px;height:7px;background:var(--gold);border-radius:50%;
-  animation:bounce .8s ease-in-out infinite;}
+.dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:bounce .8s ease-in-out infinite;}
 .dot:nth-child(2){animation-delay:.15s;}
 .dot:nth-child(3){animation-delay:.3s;}
 @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
 
-.chart-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);
-  border-radius:16px;padding:1rem;margin-top:.8rem;
-  box-shadow:0 8px 32px rgba(0,0,0,0.2);}
-.chart-title{font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;
-  color:var(--gold);letter-spacing:1px;text-transform:uppercase;
-  margin-bottom:.8rem;text-align:center;}
-.chart-wrap{position:relative;height:220px;}
-.viz-btn{display:inline-flex;align-items:center;gap:6px;
-  padding:5px 14px;background:rgba(201,168,76,0.1);
-  border:1px solid rgba(201,168,76,0.3);border-radius:20px;
-  color:var(--gold);font-size:.78rem;cursor:pointer;
-  transition:all .2s;margin-top:.7rem;font-family:'Inter',sans-serif;}
-.viz-btn:hover{background:rgba(201,168,76,0.2);transform:translateY(-1px);}
+/* ── INLINE CHART CARD ── */
+.chart-card{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:16px;padding:1rem;margin:.5rem 0 0 44px;box-shadow:0 8px 32px rgba(0,0,0,0.2);animation:slide-in .3s ease;}
+.chart-title{font-family:'Rajdhani',sans-serif;font-size:.82rem;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:.7rem;text-align:center;}
+.chart-wrap{position:relative;height:200px;}
+.chart-close{background:none;border:none;color:var(--muted);font-size:.72rem;cursor:pointer;float:right;margin-top:.3rem;padding:2px 6px;}
+.chart-close:hover{color:var(--text);}
 
-#input-area{padding:1rem 1.5rem;border-top:1px solid var(--border);
-  background:rgba(10,14,26,0.8);backdrop-filter:blur(20px);}
-.input-wrap{display:flex;gap:10px;align-items:flex-end;
-  background:rgba(255,255,255,0.05);border:1px solid var(--border);
-  border-radius:16px;padding:12px 14px;transition:all .2s;}
-.input-wrap:focus-within{border-color:rgba(201,168,76,0.5);
-  background:rgba(255,255,255,0.07);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
-#msg-input{flex:1;background:transparent;border:none;outline:none;
-  color:var(--text);font-size:.92rem;font-family:'Inter',sans-serif;
-  resize:none;min-height:24px;max-height:120px;line-height:1.5;}
+/* ── VIZ BUTTON ── */
+.viz-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;
+  background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);
+  border-radius:20px;color:var(--gold);font-size:.76rem;cursor:pointer;
+  transition:all .2s;margin-top:.6rem;font-family:'Inter',sans-serif;}
+.viz-btn:hover{background:rgba(201,168,76,0.18);transform:translateY(-1px);}
+.viz-btn.active{background:rgba(201,168,76,0.2);border-color:var(--gold);}
+
+/* ── INPUT ── */
+#input-area{padding:1rem 1.5rem;border-top:1px solid var(--border);background:rgba(10,14,26,0.8);backdrop-filter:blur(20px);}
+.input-wrap{display:flex;gap:10px;align-items:flex-end;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:16px;padding:12px 14px;transition:all .2s;}
+.input-wrap:focus-within{border-color:rgba(201,168,76,0.5);background:rgba(255,255,255,0.07);box-shadow:0 0 0 3px rgba(201,168,76,0.08);}
+#msg-input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:.92rem;font-family:'Inter',sans-serif;resize:none;min-height:24px;max-height:120px;line-height:1.5;}
 #msg-input::placeholder{color:var(--muted);}
-.send-btn{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),#a07830);
-  border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;transition:all .2s;flex-shrink:0;}
+.send-btn{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),#a07830);border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
 .send-btn:hover{transform:scale(1.05);box-shadow:0 4px 15px rgba(201,168,76,0.4);}
 .send-btn:active{transform:scale(0.97);}
-.send-btn svg{width:18px;height:18px;}
 .input-hint{font-size:.72rem;color:var(--muted);margin-top:6px;text-align:center;}
 
-#sidebar-right{background:rgba(10,14,26,0.6);backdrop-filter:blur(20px);
-  border-left:1px solid var(--border);padding:1.2rem;
-  display:flex;flex-direction:column;gap:1rem;overflow-y:auto;}
-.match-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;
-  padding:1rem;cursor:pointer;transition:all .3s;}
-.match-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-2px);
-  box-shadow:0 8px 24px rgba(0,0,0,0.2);}
-.match-vs{display:flex;align-items:center;justify-content:space-between;gap:6px;
-  font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.95rem;}
+/* ── RIGHT SIDEBAR ── */
+#sidebar-right{background:rgba(10,14,26,0.6);backdrop-filter:blur(20px);border-left:1px solid var(--border);padding:1.2rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;}
+.match-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:1rem;cursor:pointer;transition:all .3s;}
+.match-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2);}
+.match-vs{display:flex;align-items:center;justify-content:space-between;gap:6px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.95rem;}
 .match-team{flex:1;text-align:center;color:var(--text);}
-.vs-badge{padding:2px 8px;background:var(--gold);border-radius:6px;
-  color:var(--navy);font-size:.7rem;font-weight:700;}
-.match-tag{font-size:.7rem;color:var(--muted);text-align:center;margin-top:6px;
-  padding:4px 8px;background:var(--glass2);border-radius:6px;}
+.vs-badge{padding:2px 8px;background:var(--gold);border-radius:6px;color:var(--navy);font-size:.7rem;font-weight:700;}
+.match-tag{font-size:.7rem;color:var(--muted);text-align:center;margin-top:6px;padding:4px 8px;background:var(--glass2);border-radius:6px;}
 
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
-  z-index:100;display:none;align-items:center;justify-content:center;}
+/* ── PREDICTION DONUT ── */
+.pred-panel{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:1rem;transition:border-color .3s;}
+.pred-panel:hover{border-color:rgba(201,168,76,0.2);}
+.pred-idle{display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:.5rem 0;}
+.pred-idle-icon{font-size:2rem;opacity:.3;}
+.pred-idle-txt{font-size:.72rem;color:var(--muted);text-align:center;line-height:1.5;}
+#pred-chart-area{display:none;}
+.pred-match-label{font-size:.68rem;color:var(--muted);text-align:center;margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pred-chart-wrap{position:relative;height:150px;margin:.3rem 0;}
+.pred-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.pred-center-pct{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;color:var(--gold);line-height:1;}
+.pred-center-sub{font-size:.58rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-top:1px;}
+.pred-legend{display:flex;flex-direction:column;gap:4px;margin-top:.5rem;}
+.pred-leg-row{display:flex;align-items:center;gap:6px;}
+.pred-leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.pred-leg-name{font-size:.73rem;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pred-leg-pct{font-family:'Rajdhani',sans-serif;font-size:.83rem;font-weight:700;color:var(--gold);}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--navy2);border:1px solid var(--border);border-radius:20px;
-  padding:2rem;width:460px;box-shadow:0 32px 64px rgba(0,0,0,0.5);}
-.modal h2{font-family:'Rajdhani',sans-serif;color:var(--gold);font-size:1.3rem;
-  font-weight:700;letter-spacing:1px;margin-bottom:.5rem;}
+.modal{background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:2rem;width:460px;box-shadow:0 32px 64px rgba(0,0,0,0.5);}
+.modal h2{font-family:'Rajdhani',sans-serif;color:var(--gold);font-size:1.3rem;font-weight:700;letter-spacing:1px;margin-bottom:.5rem;}
 .modal p{color:var(--muted);font-size:.83rem;line-height:1.6;margin-bottom:1rem;}
-.modal input{width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);
-  border:1px solid var(--border);border-radius:10px;color:var(--text);
-  font-size:.88rem;font-family:'Inter',sans-serif;outline:none;margin-bottom:12px;}
+.modal input{width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.88rem;font-family:'Inter',sans-serif;outline:none;margin-bottom:12px;}
 .modal input:focus{border-color:var(--gold);}
 .modal-btns{display:flex;gap:10px;}
-.modal-save{flex:1;padding:10px;background:linear-gradient(135deg,var(--green),var(--green2));
-  border:none;border-radius:10px;color:var(--gold);font-family:'Rajdhani',sans-serif;
-  font-weight:700;font-size:.95rem;letter-spacing:1px;cursor:pointer;transition:all .2s;}
-.modal-save:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(26,71,42,0.4);}
-.modal-cancel{padding:10px 20px;background:var(--glass);border:1px solid var(--border);
-  border-radius:10px;color:var(--muted);font-family:'Inter',sans-serif;
-  font-size:.88rem;cursor:pointer;transition:all .2s;}
+.modal-save{flex:1;padding:10px;background:linear-gradient(135deg,var(--green),var(--green2));border:none;border-radius:10px;color:var(--gold);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.modal-save:hover{transform:translateY(-1px);}
+.modal-cancel{padding:10px 20px;background:var(--glass);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Inter',sans-serif;font-size:.88rem;cursor:pointer;}
 .modal-cancel:hover{color:var(--text);}
 *{scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
 </style>
 </head>
 <body>
-
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
 
 <div id="app">
-
   <!-- Header -->
   <header>
     <div class="logo">
       <div class="logo-ball">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="bg" cx="35%" cy="35%">
-              <stop offset="0%" stop-color="#ffffff"/>
-              <stop offset="60%" stop-color="#c0c0c0"/>
-              <stop offset="100%" stop-color="#505050"/>
-            </radialGradient>
-          </defs>
+          <defs><radialGradient id="bg" cx="35%" cy="35%"><stop offset="0%" stop-color="#ffffff"/><stop offset="60%" stop-color="#c0c0c0"/><stop offset="100%" stop-color="#505050"/></radialGradient></defs>
           <circle cx="50" cy="50" r="46" fill="url(#bg)" stroke="#333" stroke-width="1"/>
           <polygon points="50,20 62,35 58,52 42,52 38,35" fill="#1a1a1a" opacity="0.85"/>
           <polygon points="50,20 38,35 20,30 18,14 34,8" fill="#1a1a1a" opacity="0.85"/>
@@ -228,10 +186,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         <p>Powered by LangChain · RAG · FAISS · GPT-3.5</p>
       </div>
     </div>
-    <div class="status-pill">
-      <div class="status-dot" id="status-dot"></div>
-      <span id="status-text">Connecting...</span>
-    </div>
+    <div class="status-pill"><div class="status-dot" id="status-dot"></div><span id="status-text">Connecting...</span></div>
     <button class="api-btn" onclick="openModal()">⚙ Set API URL</button>
   </header>
 
@@ -239,9 +194,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
   <div id="sidebar-left">
     <div class="panel">
       <div class="panel-title">📊 Team Stats</div>
-      <input class="team-search" id="team-input" type="text"
-        placeholder="Enter team name..."
-        onkeydown="if(event.key==='Enter')loadStats()"/>
+      <input class="team-search" id="team-input" type="text" placeholder="Enter team name..." onkeydown="if(event.key==='Enter')loadStats()"/>
       <button class="load-stats-btn" onclick="loadStats()">Load Stats</button>
       <div class="stats-grid">
         <div class="stat-box"><div class="stat-num" id="s-matches">–</div><div class="stat-lbl">Matches</div></div>
@@ -252,7 +205,6 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         <div class="stat-box"><div class="stat-num" id="s-gd">–</div><div class="stat-lbl">GD</div></div>
       </div>
     </div>
-
     <div class="panel">
       <div class="panel-title">🎯 Response Style</div>
       <select class="style-select" id="style-select">
@@ -261,7 +213,6 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         <option value="Stats-heavy">Stats Heavy</option>
       </select>
     </div>
-
     <div class="panel">
       <div class="panel-title">⚡ Quick Actions</div>
       <div class="quick-btns">
@@ -281,13 +232,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
       <div class="welcome-screen" id="welcome">
         <div class="welcome-ball">
           <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
-            <defs>
-              <radialGradient id="wbg" cx="35%" cy="35%">
-                <stop offset="0%" stop-color="#ffffff"/>
-                <stop offset="60%" stop-color="#aaaaaa"/>
-                <stop offset="100%" stop-color="#404040"/>
-              </radialGradient>
-            </defs>
+            <defs><radialGradient id="wbg" cx="35%" cy="35%"><stop offset="0%" stop-color="#ffffff"/><stop offset="60%" stop-color="#aaaaaa"/><stop offset="100%" stop-color="#404040"/></radialGradient></defs>
             <circle cx="50" cy="50" r="46" fill="url(#wbg)" stroke="#444" stroke-width="1"/>
             <polygon points="50,20 62,35 58,52 42,52 38,35" fill="#111" opacity="0.8"/>
             <polygon points="50,20 38,35 20,30 18,14 34,8" fill="#111" opacity="0.8"/>
@@ -299,7 +244,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         <div class="welcome-title">Your Personal World Cup Analyst</div>
         <div class="welcome-sub">Ask me anything about World Cup history, get match predictions grounded in real data, or explore team stats from 1930 to 2022.</div>
         <div class="feature-chips">
-          <div class="chip" onclick="quickSend('What are Brazil\\'s World Cup stats?')">🇧🇷 Brazil Stats</div>
+          <div class="chip" onclick="quickSend('What are Brazil\'s World Cup stats?')">🇧🇷 Brazil Stats</div>
           <div class="chip" onclick="quickSend('Predict: France vs Argentina')">🔮 Predict a Match</div>
           <div class="chip" onclick="quickSend('Top scorers for Germany in the World Cup')">⚽ Top Scorers</div>
           <div class="chip" onclick="quickSend('Which country has won the most World Cups?')">🏆 Most Titles</div>
@@ -307,16 +252,12 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         </div>
       </div>
     </div>
-
     <div id="input-area">
       <div class="input-wrap">
-        <textarea id="msg-input" rows="1"
-          placeholder="Ask about World Cup history, request a match prediction, or explore team stats..."></textarea>
+        <textarea id="msg-input" rows="1" placeholder="Ask about World Cup history, request a match prediction, or explore team stats..."></textarea>
         <button class="send-btn" onclick="sendMessage()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
         </button>
       </div>
@@ -330,37 +271,41 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
       <div class="panel-title">🔮 Featured Predictions</div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <div class="match-card" onclick="quickSend('Predict the match: Brazil vs France')">
-          <div class="match-vs">
-            <div class="match-team">Brazil</div>
-            <div class="vs-badge">VS</div>
-            <div class="match-team">France</div>
-          </div>
+          <div class="match-vs"><div class="match-team">Brazil</div><div class="vs-badge">VS</div><div class="match-team">France</div></div>
           <div class="match-tag">Click to predict ⚽</div>
         </div>
         <div class="match-card" onclick="quickSend('Predict the match: Germany vs Argentina')">
-          <div class="match-vs">
-            <div class="match-team">Germany</div>
-            <div class="vs-badge">VS</div>
-            <div class="match-team">Argentina</div>
-          </div>
+          <div class="match-vs"><div class="match-team">Germany</div><div class="vs-badge">VS</div><div class="match-team">Argentina</div></div>
           <div class="match-tag">Click to predict ⚽</div>
         </div>
         <div class="match-card" onclick="quickSend('Predict the match: England vs Spain')">
-          <div class="match-vs">
-            <div class="match-team">England</div>
-            <div class="vs-badge">VS</div>
-            <div class="match-team">Spain</div>
-          </div>
+          <div class="match-vs"><div class="match-team">England</div><div class="vs-badge">VS</div><div class="match-team">Spain</div></div>
           <div class="match-tag">Click to predict ⚽</div>
         </div>
         <div class="match-card" onclick="quickSend('Predict the match: Portugal vs Netherlands')">
-          <div class="match-vs">
-            <div class="match-team">Portugal</div>
-            <div class="vs-badge">VS</div>
-            <div class="match-team">Netherlands</div>
-          </div>
+          <div class="match-vs"><div class="match-team">Portugal</div><div class="vs-badge">VS</div><div class="match-team">Netherlands</div></div>
           <div class="match-tag">Click to predict ⚽</div>
         </div>
+      </div>
+    </div>
+
+    <!-- Win Probability Donut -->
+    <div class="pred-panel">
+      <div class="panel-title">📈 Win Probability</div>
+      <div id="pred-idle" class="pred-idle">
+        <div class="pred-idle-icon">🔮</div>
+        <div class="pred-idle-txt">Run a match prediction to see win probabilities here.</div>
+      </div>
+      <div id="pred-chart-area">
+        <div class="pred-match-label" id="pred-match-label"></div>
+        <div class="pred-chart-wrap">
+          <canvas id="pred-donut"></canvas>
+          <div class="pred-center">
+            <div class="pred-center-pct" id="pred-center-pct">–</div>
+            <div class="pred-center-sub" id="pred-center-sub">WIN</div>
+          </div>
+        </div>
+        <div class="pred-legend" id="pred-legend"></div>
       </div>
     </div>
 
@@ -373,10 +318,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
         <div>🎮 FIFA Player Statistics</div>
         <div>📈 Rolling Form Metrics</div>
         <div>🥅 Penalty Shootout Records</div>
-        <div style="margin-top:.6rem;font-size:.7rem;color:#4a5a6a;
-          border-top:1px solid var(--border);padding-top:.6rem;">
-          ⚠️ Educational use only. Not professional sports analytics advice.
-        </div>
+        <div style="margin-top:.6rem;font-size:.7rem;color:#4a5a6a;border-top:1px solid var(--border);padding-top:.6rem;">⚠️ Educational use only.</div>
       </div>
     </div>
   </div>
@@ -396,87 +338,93 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 </div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────
 let API_URL = localStorage.getItem('wc_api_url') || '';
-const chatEl  = document.getElementById('chat-messages');
+const chatEl = document.getElementById('chat-messages');
 const inputEl = document.getElementById('msg-input');
 const welcomeEl = document.getElementById('welcome');
-let chartCount = 0;
-const chartRegistry = {};
 
-// ── API Modal ─────────────────────────────────────────────────
-function openModal(){
+// Chart registry: keyed by unique ID, stores Chart.js instance
+const chartRegistry = {};
+let chartSeq = 0;
+
+// Prediction donut instance
+let predChart = null;
+const PRED_COLORS = ['#c9a84c', '#3a4a5a', '#2d6a4f'];
+
+// ── API Modal ──────────────────────────────────────────────────
+function openModal() {
   document.getElementById('api-url-input').value = API_URL;
   document.getElementById('modal').classList.add('open');
 }
-function closeModal(){ document.getElementById('modal').classList.remove('open'); }
-function saveApiUrl(){
-  const v = document.getElementById('api-url-input').value.trim().replace(/\/$/,'');
-  if(!v){ alert('Please enter a valid URL.'); return; }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function saveApiUrl() {
+  const v = document.getElementById('api-url-input').value.trim().replace(/\/$/, '');
+  if (!v) { alert('Please enter a valid URL.'); return; }
   API_URL = v;
   localStorage.setItem('wc_api_url', v);
   closeModal();
   checkHealth();
 }
 
-// ── Health check ──────────────────────────────────────────────
-async function checkHealth(){
+// ── Health Check ───────────────────────────────────────────────
+async function checkHealth() {
   const dot = document.getElementById('status-dot');
   const txt = document.getElementById('status-text');
-  if(!API_URL){ dot.style.background='#f44336'; txt.textContent='No API URL'; return; }
-  try{
-    const r = await fetch(`${API_URL}/health`,{
-      signal: AbortSignal.timeout(8000),
-      headers: {'ngrok-skip-browser-warning':'true'}
-    });
+  if (!API_URL) { dot.style.background = '#f44336'; txt.textContent = 'No API URL'; return; }
+  try {
+    const r = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(8000), headers: { 'ngrok-skip-browser-warning': 'true' } });
     const d = await r.json();
     dot.style.background = '#4caf50';
     txt.textContent = `Live · ${d.vectors} vectors`;
-  } catch(e){
+  } catch {
     dot.style.background = '#f44336';
     txt.textContent = 'API Offline';
   }
 }
 setInterval(checkHealth, 30000);
 checkHealth();
-if(!API_URL) setTimeout(openModal, 1200);
+if (!API_URL) setTimeout(openModal, 1200);
 
-// ── Send message ──────────────────────────────────────────────
-async function sendMessage(){
+// ── Messaging ──────────────────────────────────────────────────
+async function sendMessage() {
   const text = inputEl.value.trim();
-  if(!text) return;
-  if(!API_URL){ openModal(); return; }
+  if (!text) return;
+  if (!API_URL) { openModal(); return; }
   inputEl.value = '';
   inputEl.style.height = 'auto';
-  if(welcomeEl) welcomeEl.style.display = 'none';
+  if (welcomeEl) welcomeEl.style.display = 'none';
 
   appendMsg('user', text);
-  const typing = appendTyping();
+  const typingEl = appendTyping();
 
-  try{
+  try {
     const style = document.getElementById('style-select').value;
-    const r = await fetch(`${API_URL}/chat`,{
+    const r = await fetch(`${API_URL}/chat`, {
       method: 'POST',
-      headers: {'Content-Type':'application/json','ngrok-skip-browser-warning':'true'},
-      body: JSON.stringify({message: text, style}),
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+      body: JSON.stringify({ message: text, style }),
       signal: AbortSignal.timeout(60000)
     });
     const d = await r.json();
-    typing.remove();
-    appendMsg('bot', d.response || 'No response received.');
-  } catch(e){
-    typing.remove();
-    appendMsg('bot', `⚠️ Could not reach the API. Make sure your Colab session is running and the URL is correct.\n\nError: ${e.message}`);
+    typingEl.remove();
+    const resp = d.response || 'No response received.';
+    const msgDiv = appendMsg('bot', resp);
+    // Attach chart button to the bot bubble (not the outer msg div)
+    const bub = msgDiv.querySelector('.bubble.bot');
+    attachChartBtn(text, resp, bub, msgDiv);
+    // Try to update the prediction donut
+    tryUpdateDonut(text, resp);
+  } catch (e) {
+    typingEl.remove();
+    appendMsg('bot', `⚠️ Could not reach the API. Make sure your Colab session is running.\n\nError: ${e.message}`);
   }
 }
 
-function quickSend(text){
-  inputEl.value = text;
-  sendMessage();
-}
+function quickSend(text) { inputEl.value = text; sendMessage(); }
 
-// ── Chat rendering ────────────────────────────────────────────
-function appendMsg(role, text){
+// ── Chat Rendering ─────────────────────────────────────────────
+function appendMsg(role, text) {
   const div = document.createElement('div');
   div.className = `msg ${role}`;
   const ava = document.createElement('div');
@@ -488,12 +436,11 @@ function appendMsg(role, text){
   div.appendChild(ava);
   div.appendChild(bub);
   chatEl.appendChild(div);
-  if(role === 'bot') detectAndShowCharts(text, bub);
   chatEl.scrollTop = chatEl.scrollHeight;
   return div;
 }
 
-function appendTyping(){
+function appendTyping() {
   const div = document.createElement('div');
   div.className = 'msg';
   div.innerHTML = `<div class="avatar bot">⚽</div>
@@ -505,210 +452,323 @@ function appendTyping(){
   return div;
 }
 
-function formatText(text){
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g,'<em>$1</em>')
-    .replace(/•\s/g,'<br>• ')
-    .replace(/\n/g,'<br>');
+function formatText(t) {
+  return t
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/•\s/g, '<br>• ')
+    .replace(/\n/g, '<br>');
 }
 
-// ── Team stats ────────────────────────────────────────────────
-async function loadStats(){
+// ── Team Stats ─────────────────────────────────────────────────
+async function loadStats() {
   const team = document.getElementById('team-input').value.trim();
-  if(!team || !API_URL) return;
-  try{
-    const r = await fetch(`${API_URL}/team-stats/${encodeURIComponent(team)}`,
-      {headers:{'ngrok-skip-browser-warning':'true'}});
+  if (!team || !API_URL) return;
+  try {
+    const r = await fetch(`${API_URL}/team-stats/${encodeURIComponent(team)}`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
     const d = await r.json();
-    if(d.status === 'ok'){
+    if (d.status === 'ok') {
       const s = d.data;
       document.getElementById('s-matches').textContent = s.total;
-      document.getElementById('s-wins').textContent    = s.wins;
-      document.getElementById('s-wr').textContent      = s.win_pct + '%';
-      document.getElementById('s-gf').textContent      = s.goals_for;
-      document.getElementById('s-ga').textContent      = s.goals_against;
-      document.getElementById('s-gd').textContent      = (s.goal_diff > 0 ? '+' : '') + s.goal_diff;
+      document.getElementById('s-wins').textContent = s.wins;
+      document.getElementById('s-wr').textContent = s.win_pct + '%';
+      document.getElementById('s-gf').textContent = s.goals_for;
+      document.getElementById('s-ga').textContent = s.goals_against;
+      document.getElementById('s-gd').textContent = (s.goal_diff > 0 ? '+' : '') + s.goal_diff;
     } else {
-      alert(`No World Cup data found for "${team}". Try the full country name e.g. "United States".`);
+      alert(`No World Cup data found for "${team}". Try the full country name.`);
     }
-  } catch(e){ alert('Could not load stats. Check API connection.'); }
+  } catch { alert('Could not load stats. Check API connection.'); }
 }
 
-// ── Chart registry ────────────────────────────────────────────
-function renderChart(data, containerId){
-  const wrap = document.getElementById(containerId);
-  if(!wrap) return;
-  if(chartRegistry[containerId]){ chartRegistry[containerId].destroy(); }
+// ── Chart Rendering ────────────────────────────────────────────
+function safeRenderChart(data, canvasId) {
+  // Destroy any previous chart on this canvas
+  if (chartRegistry[canvasId]) {
+    chartRegistry[canvasId].destroy();
+    delete chartRegistry[canvasId];
+  }
+  const wrap = document.getElementById(canvasId);
+  if (!wrap) return;
+  // Replace canvas entirely to clear any stale state
   const canvas = document.createElement('canvas');
   wrap.innerHTML = '';
   wrap.appendChild(canvas);
   const ctx = canvas.getContext('2d');
+
   const baseOpts = {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{
-      legend:{labels:{color:'#e8eaf0',font:{family:'Inter',size:11}}},
-      title:{display:false}
-    },
-    scales:{}
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#e8eaf0', font: { family: 'Inter', size: 11 } } } },
+    animation: { duration: 500 }
   };
+
   let chart;
-  if(data.type === 'bar'){
-    chart = new Chart(ctx,{type:'bar',
-      data:{labels:data.labels,datasets:[{data:data.values,backgroundColor:data.colors,borderRadius:6,borderSkipped:false}]},
-      options:{...baseOpts,plugins:{...baseOpts.plugins,legend:{display:false}},
-        scales:{x:{ticks:{color:'#7a8a9a'},grid:{color:'rgba(255,255,255,0.05)'}},
-                y:{ticks:{color:'#7a8a9a'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
-  } else if(data.type === 'bar_h'){
-    chart = new Chart(ctx,{type:'bar',
-      data:{labels:data.labels,datasets:[{data:data.values,backgroundColor:data.colors,borderRadius:4,borderSkipped:false}]},
-      options:{...baseOpts,indexAxis:'y',plugins:{...baseOpts.plugins,legend:{display:false}},
-        scales:{x:{ticks:{color:'#7a8a9a'},grid:{color:'rgba(255,255,255,0.05)'}},
-                y:{ticks:{color:'#e8eaf0',font:{size:10}},grid:{display:false}}}}});
-  } else if(data.type === 'line'){
-    chart = new Chart(ctx,{type:'line',
-      data:{labels:data.labels,datasets:data.datasets.map(ds=>({
-        label:ds.label,data:ds.values,borderColor:ds.color,
-        backgroundColor:ds.color+'22',tension:0.4,fill:true,pointRadius:2}))},
-      options:{...baseOpts,
-        scales:{x:{ticks:{color:'#7a8a9a',maxTicksLimit:6,font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}},
-                y:{ticks:{color:'#7a8a9a'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
-  } else if(data.type === 'radar'){
-    chart = new Chart(ctx,{type:'radar',
-      data:{labels:data.categories,datasets:data.datasets.map(ds=>({
-        label:ds.label,data:ds.values,borderColor:ds.color,
-        backgroundColor:ds.color+'33',pointBackgroundColor:ds.color,pointRadius:3}))},
-      options:{...baseOpts,
-        scales:{r:{ticks:{color:'#7a8a9a',backdropColor:'transparent',font:{size:9}},
-          grid:{color:'rgba(255,255,255,0.1)'},
-          pointLabels:{color:'#e8eaf0',font:{size:10}},
-          suggestedMin:60,suggestedMax:95}}}});
+  if (data.type === 'bar') {
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: data.colors, borderRadius: 6, borderSkipped: false }] },
+      options: { ...baseOpts, plugins: { ...baseOpts.plugins, legend: { display: false } }, scales: { x: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } } } }
+    });
+  } else if (data.type === 'bar_h') {
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: data.colors, borderRadius: 4, borderSkipped: false }] },
+      options: { ...baseOpts, indexAxis: 'y', plugins: { ...baseOpts.plugins, legend: { display: false } }, scales: { x: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } } } }
+    });
+  } else if (data.type === 'line') {
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: data.labels, datasets: data.datasets.map(ds => ({ label: ds.label, data: ds.values, borderColor: ds.color, backgroundColor: ds.color + '22', tension: 0.4, fill: true, pointRadius: 2 })) },
+      options: { ...baseOpts, scales: { x: { ticks: { color: '#7a8a9a', maxTicksLimit: 6, font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#7a8a9a' }, grid: { color: 'rgba(255,255,255,0.05)' } } } }
+    });
+  } else if (data.type === 'radar') {
+    chart = new Chart(ctx, {
+      type: 'radar',
+      data: { labels: data.categories, datasets: data.datasets.map(ds => ({ label: ds.label, data: ds.values, borderColor: ds.color, backgroundColor: ds.color + '33', pointBackgroundColor: ds.color, pointRadius: 3 })) },
+      options: { ...baseOpts, scales: { r: { ticks: { color: '#7a8a9a', backdropColor: 'transparent', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#e8eaf0', font: { size: 10 } }, suggestedMin: 60, suggestedMax: 95 } } }
+    });
   }
-  if(chart) chartRegistry[containerId] = chart;
+  if (chart) chartRegistry[canvasId] = chart;
 }
 
-// ── Chart config detection ────────────────────────────────────
-function getChartConfig(text){
-  const lower = text.toLowerCase();
+// ── Chart Button Logic ─────────────────────────────────────────
+// Determine what charts (if any) apply to a bot response
+function getChartConfig(userMsg, botResp) {
+  const uLow = userMsg.toLowerCase();
+  const bLow = botResp.toLowerCase();
+  const combined = uLow + ' ' + bLow;
 
-  // H2H / prediction / match report
-  const h2hMatch = text.match(/([A-Z][a-zA-Z\s]{2,20}?)\s+vs\.?\s+([A-Z][a-zA-Z\s]{2,20})/);
-  if(h2hMatch && (lower.includes('win') || lower.includes('head') ||
-      lower.includes('predict') || lower.includes('elo') ||
-      lower.includes('form') || lower.includes('report') ||
-      lower.includes('match preview'))){
-    const ta = h2hMatch[1].trim(), tb = h2hMatch[2].trim();
-    return {chartable:true, charts:[
-      {label:'H2H Record', endpoint:`/chart/h2h/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`, title:`${ta} vs ${tb} — Head to Head`},
-      {label:'FIFA Radar',  endpoint:`/chart/team-radar/${encodeURIComponent(ta)}/${encodeURIComponent(tb)}`, title:`${ta} vs ${tb} — FIFA Ratings`},
-    ]};
+  // H2H / prediction — look in the USER message for "X vs Y"
+  const vsRe = /([a-z][a-z\s]{1,20}?)\s+vs\.?\s+([a-z][a-z\s]{1,20})/i;
+  const vsMatch = userMsg.match(vsRe) || botResp.match(vsRe);
+  const isPrediction = /predict|win|head.to.head|h2h|elo|form|report|preview|match/i.test(combined);
+
+  if (vsMatch && isPrediction) {
+    const tA = vsMatch[1].trim(), tB = vsMatch[2].trim();
+    return {
+      chartable: true,
+      charts: [
+        { label: 'H2H Record', endpoint: `/chart/h2h/${encodeURIComponent(tA)}/${encodeURIComponent(tB)}`, title: `${tA} vs ${tB} — Head to Head` },
+        { label: 'FIFA Radar', endpoint: `/chart/team-radar/${encodeURIComponent(tA)}/${encodeURIComponent(tB)}`, title: `${tA} vs ${tB} — FIFA Ratings` }
+      ]
+    };
   }
 
-  // Top scorers — explicit only
-  if((lower.includes('top scorer') || lower.includes('all-time') ||
-      lower.includes('most goals') || lower.includes('leading scorer')) && !lower.includes('hat')){
-    const teamMatch = text.match(/\bfor ([A-Z][a-zA-Z\s]{2,20})\b/);
-    const team = teamMatch ? teamMatch[1].trim() : 'all';
-    return {chartable:true, charts:[
-      {label:'View Chart', endpoint:`/chart/top-scorers/${encodeURIComponent(team)}`,
-       title: team==='all' ? 'All-Time Top World Cup Scorers' : `${team} — Top WC Scorers`}
-    ]};
+  // Top scorers
+  if (/top\s+scor|all.time\s+scor|most\s+goals|leading\s+scor/i.test(combined) && !/hat/i.test(combined)) {
+    const teamM = userMsg.match(/\bfor\s+([A-Z][a-zA-Z\s]{2,20})\b/);
+    const team = teamM ? teamM[1].trim() : 'all';
+    return {
+      chartable: true,
+      charts: [{ label: 'Top Scorers', endpoint: `/chart/top-scorers/${encodeURIComponent(team)}`, title: team === 'all' ? 'All-Time Top WC Scorers' : `${team} — Top WC Scorers` }]
+    };
   }
 
-  // Team record / form
-  if((lower.includes('record') || lower.includes('recent form') || lower.includes('win rate') ||
-      lower.includes('world cup stats') || lower.includes('world cup record')) &&
-      !lower.includes(' vs ') && !lower.includes('hat')){
-    const teamWords = text.match(/\b(Brazil|Germany|France|Argentina|Spain|England|Italy|Portugal|Netherlands|Belgium|Croatia|Mexico|Uruguay|Japan|South Korea|United States|Morocco|Senegal|Ghana|Nigeria|Poland|Switzerland|Denmark|Australia|Serbia|Cameroon|Ecuador|Qatar|Canada|Wales|Iran|Tunisia|Saudi Arabia|Costa Rica|Algeria|Hungary|Sweden|Romania|Chile|Colombia|Peru)\b/i);
-    if(teamWords){
-      return {chartable:true, charts:[
-        {label:'View Chart', endpoint:`/chart/team-form/${encodeURIComponent(teamWords[0])}`,
-         title:`${teamWords[0]} — Recent Form`}
-      ]};
+  // Team form / record — no "vs"
+  if (!/\svs\s/i.test(userMsg) && /record|recent\s+form|win\s+rate|world\s+cup\s+stats/i.test(combined)) {
+    const knownTeams = /\b(Brazil|Germany|France|Argentina|Spain|England|Italy|Portugal|Netherlands|Belgium|Croatia|Mexico|Uruguay|Japan|South Korea|United States|Morocco|Senegal|Ghana|Nigeria|Poland|Switzerland|Denmark|Australia|Serbia|Cameroon|Ecuador|Qatar|Canada|Wales|Iran|Tunisia|Saudi Arabia|Costa Rica|Algeria|Hungary|Sweden|Romania|Chile|Colombia|Peru)\b/i;
+    const tm = userMsg.match(knownTeams);
+    if (tm) {
+      return { chartable: true, charts: [{ label: 'Team Form', endpoint: `/chart/team-form/${encodeURIComponent(tm[0])}`, title: `${tm[0]} — Recent Form` }] };
     }
   }
 
   // Tournament goals
-  if((lower.includes('tournament') || lower.includes('edition')) &&
-     (lower.includes('most goals') || lower.includes('total goals') ||
-      lower.includes('highest scoring') || lower.includes('goals per'))){
-    return {chartable:true, charts:[
-      {label:'View Chart', endpoint:`/chart/tournament-goals`,
-       title:'Total Goals by World Cup Tournament'}
-    ]};
+  if (/tournament|edition/i.test(combined) && /most\s+goals|total\s+goals|highest\s+scoring|goals\s+per/i.test(combined)) {
+    return { chartable: true, charts: [{ label: 'Tournament Goals', endpoint: '/chart/tournament-goals', title: 'Total Goals by World Cup Tournament' }] };
   }
 
-  return {chartable:false};
+  return { chartable: false };
 }
 
-// ── Attach single 📊 button if chartable ─────────────────────
-function detectAndShowCharts(text, msgEl){
-  const config = getChartConfig(text);
-  if(!config.chartable) return;
+function attachChartBtn(userMsg, botResp, bubbleEl, msgDiv) {
+  const config = getChartConfig(userMsg, botResp);
+  if (!config.chartable) return;
 
-  let currentIdx = 0;
+  let idx = 0;           // which chart in the array we're showing
+  let activeCardId = null; // ID of the currently rendered chart card
+
   const btn = document.createElement('button');
   btn.className = 'viz-btn';
-
-  function updateLabel(){ btn.textContent = `📊 ${config.charts[currentIdx].label}`; }
-  updateLabel();
-
-  let chartCard = null;
+  btn.textContent = `📊 ${config.charts[0].label}`;
 
   btn.onclick = async () => {
-    const cfg = config.charts[currentIdx];
-    if(config.charts.length > 1){
-      currentIdx = (currentIdx + 1) % config.charts.length;
-      updateLabel();
-    }
-    if(chartCard){ chartCard.remove(); chartCard = null; }
+    const cfg = config.charts[idx];
 
-    const id = `chart-${++chartCount}`;
-    chartCard = document.createElement('div');
-    chartCard.className = 'chart-card';
-    chartCard.innerHTML = `
-      <div class="chart-title">${cfg.title}</div>
-      <div class="chart-wrap" id="${id}">
-        <div style="display:flex;align-items:center;justify-content:center;
-          height:100%;color:var(--muted);font-size:.85rem;">Loading chart...</div>
+    // Remove existing chart card if open (toggle off same btn)
+    if (activeCardId) {
+      const existing = document.getElementById(activeCardId);
+      if (existing) {
+        // Destroy chart instance
+        if (chartRegistry[activeCardId + '-canvas']) {
+          chartRegistry[activeCardId + '-canvas'].destroy();
+          delete chartRegistry[activeCardId + '-canvas'];
+        }
+        existing.remove();
+        activeCardId = null;
+        btn.classList.remove('active');
+        // Cycle to next chart if there are multiple
+        if (config.charts.length > 1) {
+          idx = (idx + 1) % config.charts.length;
+          btn.textContent = `📊 ${config.charts[idx].label}`;
+        }
+        return;
+      }
+    }
+
+    btn.classList.add('active');
+    const cardId = `cc-${++chartSeq}`;
+    const canvasId = `${cardId}-canvas`;
+    activeCardId = cardId;
+
+    // Build card
+    const card = document.createElement('div');
+    card.className = 'chart-card';
+    card.id = cardId;
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="chart-title">${cfg.title}</div>
+        <button class="chart-close" onclick="closeChart('${cardId}','${canvasId}',this)">✕ Close</button>
       </div>
-      <div style="text-align:right;margin-top:.4rem;">
-        <button onclick="this.closest('.chart-card').remove()"
-          style="background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;">
-          ✕ Close</button>
+      <div class="chart-wrap" id="${canvasId}">
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:.82rem;">Loading…</div>
       </div>`;
 
-    const msgDiv = msgEl.closest('.msg') || msgEl.parentElement;
-    msgDiv.parentElement.insertBefore(chartCard, msgDiv.nextSibling);
+    // Insert directly after the msg row
+    msgDiv.insertAdjacentElement('afterend', card);
     chatEl.scrollTop = chatEl.scrollHeight;
 
-    try{
-      const r = await fetch(`${API_URL}${cfg.endpoint}`,
-        {headers:{'ngrok-skip-browser-warning':'true'}});
+    // Cycle label for next click
+    if (config.charts.length > 1) {
+      idx = (idx + 1) % config.charts.length;
+      btn.textContent = `📊 ${config.charts[idx].label}`;
+    }
+
+    try {
+      const r = await fetch(`${API_URL}${cfg.endpoint}`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
       const d = await r.json();
-      if(d.status === 'ok'){
-        renderChart(d, id);
+      if (d.status === 'ok') {
+        safeRenderChart(d, canvasId);
       } else {
-        document.getElementById(id).innerHTML =
-          `<div style="color:var(--muted);text-align:center;padding:2rem;font-size:.85rem;">No chart data available.</div>`;
+        document.getElementById(canvasId).innerHTML = `<div style="color:var(--muted);text-align:center;padding:2rem;font-size:.82rem;">No chart data available for this query.</div>`;
       }
-    } catch(e){
-      document.getElementById(id).innerHTML =
-        `<div style="color:#e74c3c;text-align:center;padding:2rem;font-size:.85rem;">Failed to load chart.</div>`;
+    } catch (e) {
+      const w = document.getElementById(canvasId);
+      if (w) w.innerHTML = `<div style="color:#e74c3c;text-align:center;padding:2rem;font-size:.82rem;">Failed to load chart. Check API connection.</div>`;
     }
   };
 
-  msgEl.appendChild(btn);
+  bubbleEl.appendChild(btn);
 }
 
-// ── Input resize + Enter to send ─────────────────────────────
-inputEl.addEventListener('input', function(){
+function closeChart(cardId, canvasId, btnEl) {
+  if (chartRegistry[canvasId]) {
+    chartRegistry[canvasId].destroy();
+    delete chartRegistry[canvasId];
+  }
+  const card = document.getElementById(cardId);
+  if (card) card.remove();
+  // Reset the viz btn appearance
+  const vizBtns = document.querySelectorAll('.viz-btn.active');
+  vizBtns.forEach(b => b.classList.remove('active'));
+}
+
+// ── Prediction Donut ───────────────────────────────────────────
+function tryUpdateDonut(userMsg, botResp) {
+  const vsRe = /([A-Za-z][a-zA-Z\s]{1,25}?)\s+vs\.?\s+([A-Za-z][a-zA-Z\s]{1,25})/i;
+  const m = userMsg.match(vsRe);
+  if (!m) return;
+  const tA = m[1].trim(), tB = m[2].trim();
+  const pcts = extractProbabilities(botResp, tA, tB);
+  if (pcts) renderPredDonut(tA, tB, pcts);
+}
+
+function extractProbabilities(text, tA, tB) {
+  const clean = text.replace(/\n/g, ' ');
+
+  function findPct(team) {
+    const esc = team.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const m1 = clean.match(new RegExp(esc + '[^%\\d]{0,30}(\\d{1,3})\\s*%', 'i'));
+    const m2 = clean.match(new RegExp('(\\d{1,3})\\s*%[^%\\d]{0,30}' + esc, 'i'));
+    const v = m1 ? parseInt(m1[1]) : (m2 ? parseInt(m2[1]) : null);
+    return (v !== null && v > 0 && v <= 100) ? v : null;
+  }
+
+  let pA = findPct(tA), pB = findPct(tB);
+
+  // Fallback: grab first two percentages in order
+  if (pA === null || pB === null) {
+    const all = [...clean.matchAll(/(\d{1,3})\s*%/g)].map(m => parseInt(m[1])).filter(n => n > 0 && n <= 100);
+    if (all.length >= 2) { pA = pA ?? all[0]; pB = pB ?? all[1]; }
+  }
+  if (pA === null || pB === null) return null;
+
+  pA = Math.min(Math.max(pA, 1), 98);
+  pB = Math.min(Math.max(pB, 1), 98);
+  let draw = Math.max(0, 100 - pA - pB);
+  if (pA + pB > 100) { const s = 100 / (pA + pB); pA = Math.round(pA * s); pB = 100 - pA; draw = 0; }
+  return { pA, draw, pB };
+}
+
+function renderPredDonut(tA, tB, { pA, draw, pB }) {
+  document.getElementById('pred-idle').style.display = 'none';
+  const area = document.getElementById('pred-chart-area');
+  area.style.display = 'block';
+  document.getElementById('pred-match-label').textContent = `${tA} vs ${tB}`;
+
+  const winner = pA >= pB ? tA : tB;
+  const winPct = Math.max(pA, pB);
+  document.getElementById('pred-center-pct').textContent = winPct + '%';
+  document.getElementById('pred-center-sub').textContent = winner.slice(0, 8).toUpperCase();
+
+  // Legend
+  const legEl = document.getElementById('pred-legend');
+  const rows = [{ label: tA, pct: pA, c: PRED_COLORS[0] }, { label: 'Draw', pct: draw, c: PRED_COLORS[1] }, { label: tB, pct: pB, c: PRED_COLORS[2] }];
+  legEl.innerHTML = rows.map(r => `
+    <div class="pred-leg-row">
+      <div class="pred-leg-dot" style="background:${r.c}"></div>
+      <div class="pred-leg-name">${r.label}</div>
+      <div class="pred-leg-pct">${r.pct}%</div>
+    </div>`).join('');
+
+  // Destroy previous donut safely
+  if (predChart) { predChart.destroy(); predChart = null; }
+
+  const canvas = document.getElementById('pred-donut');
+  // Swap canvas to avoid Chart.js stale state
+  const newCanvas = document.createElement('canvas');
+  newCanvas.id = 'pred-donut';
+  canvas.parentNode.replaceChild(newCanvas, canvas);
+
+  predChart = new Chart(newCanvas.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: [tA, 'Draw', tB],
+      datasets: [{ data: [pA, draw, pB], backgroundColor: PRED_COLORS, borderColor: PRED_COLORS.map(c => c + '88'), borderWidth: 2, hoverOffset: 5 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '68%',
+      animation: { animateRotate: true, duration: 700 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed}%` },
+          backgroundColor: 'rgba(10,14,26,0.9)', titleColor: '#c9a84c', bodyColor: '#e8eaf0',
+          borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1
+        }
+      }
+    }
+  });
+}
+
+// ── Input resize + Enter ───────────────────────────────────────
+inputEl.addEventListener('input', function () {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
-inputEl.addEventListener('keydown', function(e){
-  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+inputEl.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
 </script>
 </body>
