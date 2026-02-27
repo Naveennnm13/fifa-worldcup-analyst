@@ -727,6 +727,30 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
 }
 
 // ── Prediction donut ───────────────────────────────────────────
+// Strategy: gate entirely on what the BOT actually returned.
+// Only show the donut if the bot's response contains real probability data.
+// Team names come from user message first, then bot response as fallback.
+function tryUpdateDonut(userMsg, botResp) {
+  // Step 1: does the bot response actually contain probability-style content?
+  // We require at least one % value inside a prediction-context sentence.
+  var hasProbabilityData = /(?:win|chance|probabilit|likelihood|favour|favor|advantage|edge|predict|forecast|leans?|favou?rs?)[^.]{0,120}?\d{1,3}\s*%/i.test(botResp)
+    || /\d{1,3}\s*%[^.]{0,80}?(?:win|chance|probabilit|likelihood|favour|favor|advantage|edge|predict|forecast|leans?|favou?rs?)/i.test(botResp);
+
+  if (!hasProbabilityData) return; // bot gave stats/history, not a probability prediction
+
+  // Step 2: get team names — user message is most reliable source
+  var teams = extractTeams(userMsg) || extractTeams(botResp);
+  if (!teams) return;
+
+  // Step 3: extract actual percentage values from the bot response
+  var pcts = extractProbabilities(botResp, teams.tA, teams.tB);
+  if (pcts) renderPredDonut(teams.tA, teams.tB, pcts);
+}
+
+function extractProbabilities(text, tA, tB) {
+  var clean = text.replace(/\n/g, ' ');
+
+  function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\// ── Prediction donut ───────────────────────────────────────────
 function tryUpdateDonut(userMsg, botResp) {
   var isPredictMsg = /\b(predict|vs\.?|who\s+would\s+win|who\s+will\s+win|match\s+preview|forecast|h2h)\b/i.test(userMsg);
   if (!isPredictMsg) return;
@@ -800,6 +824,91 @@ function extractProbabilities(text, tA, tB) {
   if (pA + pB > 100) { var s = 100 / (pA + pB); pA = Math.round(pA * s); pB = 100 - pA; }
   var drawVal = Math.max(0, 100 - pA - pB);
   return { pA: pA, draw: drawVal, pB: pB };
+}'); }
+
+  // Strategy A: find % explicitly near a team name inside a prediction-context sentence
+  var predCtx = /win|chance|probabilit|likelihood|favour|favor|advantage|edge|predict|leans?|favou?rs?/i;
+
+  function findTeamPct(team) {
+    var esc = escRe(team);
+    // "Brazil ... 62%" within same sentence
+    var fwdRe = new RegExp(esc + '[^.]{0,100}?(\\d{1,3})\\s*%', 'i');
+    var fwdM = clean.match(fwdRe);
+    if (fwdM) {
+      var ctx = clean.slice(Math.max(0, fwdM.index - 30), fwdM.index + fwdM[0].length + 50);
+      if (predCtx.test(ctx)) return parseInt(fwdM[1]);
+    }
+    // "62% ... Brazil" within same sentence
+    var bwdRe = new RegExp('(\\d{1,3})\\s*%[^.]{0,100}?' + esc, 'i');
+    var bwdM = clean.match(bwdRe);
+    if (bwdM) {
+      var ctx2 = clean.slice(Math.max(0, bwdM.index - 30), bwdM.index + bwdM[0].length + 50);
+      if (predCtx.test(ctx2)) return parseInt(bwdM[1]);
+    }
+    return null;
+  }
+
+  var pA = findTeamPct(tA);
+  var pB = findTeamPct(tB);
+
+  // Strategy B: scan the prediction-context section for a trio summing to ~100
+  // e.g. "55% win, 20% draw, 25% win" or a win/draw/loss breakdown
+  if (pA === null || pB === null) {
+    // Isolate the most prediction-dense paragraph
+    var sections = clean.split(/\.\s+/);
+    var bestSection = '';
+    var bestScore = 0;
+    sections.forEach(function(s) {
+      var score = (s.match(/\d{1,3}\s*%/g) || []).length
+                + (predCtx.test(s) ? 2 : 0);
+      if (score > bestScore) { bestScore = score; bestSection = s; }
+    });
+    var source = bestScore > 0 ? bestSection : clean;
+
+    var allPcts = [];
+    var re = /(\d{1,3})\s*%/g;
+    var m;
+    while ((m = re.exec(source)) !== null) {
+      var n = parseInt(m[1]);
+      if (n >= 1 && n <= 99) allPcts.push(n);
+    }
+
+    // Find a pair whose remainder (draw) is 0–40 — typical for win/draw/win splits
+    var found = false;
+    for (var i = 0; i < allPcts.length - 1 && !found; i++) {
+      for (var j = i + 1; j < allPcts.length && !found; j++) {
+        var remainder = 100 - allPcts[i] - allPcts[j];
+        if (remainder >= 0 && remainder <= 40) {
+          if (pA === null) pA = allPcts[i];
+          if (pB === null) pB = allPcts[j];
+          found = true;
+        }
+      }
+    }
+
+    // Strategy C: if no trio found, just use the two largest % values in the section
+    // (only if they're both >30 — ruling out things like "28.3% win rate")
+    if ((pA === null || pB === null) && allPcts.length >= 2) {
+      var sorted = allPcts.slice().sort(function(a, b) { return b - a; });
+      // Only use if values look like win probabilities (>30 each, sum ≤ 100)
+      if (sorted[0] > 30 && sorted[1] > 10 && sorted[0] + sorted[1] <= 100) {
+        if (pA === null) pA = sorted[0];
+        if (pB === null) pB = sorted[1];
+      }
+    }
+  }
+
+  if (pA === null || pB === null) return null;
+
+  // Sanity clamp
+  pA = Math.min(Math.max(pA, 1), 98);
+  pB = Math.min(Math.max(pB, 1), 98);
+  if (pA + pB > 100) {
+    var s = 100 / (pA + pB);
+    pA = Math.round(pA * s);
+    pB = 100 - pA;
+  }
+  return { pA: pA, draw: Math.max(0, 100 - pA - pB), pB: pB };
 }
 
 function renderPredDonut(tA, tB, pcts) {
