@@ -320,31 +320,28 @@ var chartSeq = 0;
 var predChart = null;
 var PRED_COLORS = ['#c9a84c', '#3a4a5a', '#2d6a4f'];
 
-/* ── Team alias map ─────────────────────────────────────────── */
 var TEAM_ALIASES = {
-  'usa': 'United States', 'us': 'United States', 'usmnt': 'United States',
-  'america': 'United States', 'united states of america': 'United States',
-  'eng': 'England', 'sco': 'Scotland', 'wal': 'Wales',
-  'ireland': 'Republic of Ireland',
-  'ger': 'Germany', 'deutschland': 'Germany',
-  'bra': 'Brazil', 'brasil': 'Brazil',
-  'arg': 'Argentina', 'fra': 'France',
-  'esp': 'Spain', 'spa': 'Spain', 'ita': 'Italy',
-  'ned': 'Netherlands', 'holland': 'Netherlands', 'neth': 'Netherlands',
-  'por': 'Portugal', 'bel': 'Belgium', 'cro': 'Croatia', 'mex': 'Mexico',
-  'jpn': 'Japan', 'jap': 'Japan',
-  'south korea': 'South Korea', 'korea': 'South Korea', 'kor': 'South Korea',
-  'republic of korea': 'South Korea',
-  'aus': 'Australia', 'rus': 'Russia', 'ussr': 'Russia',
-  'czech republic': 'Czech Republic', 'czechia': 'Czech Republic', 'cze': 'Czech Republic',
-  'sui': 'Switzerland', 'swe': 'Sweden', 'pol': 'Poland', 'den': 'Denmark',
-  'nga': 'Nigeria', 'gha': 'Ghana', 'sen': 'Senegal', 'mar': 'Morocco',
-  'cmr': 'Cameroon', 'alg': 'Algeria',
-  'uru': 'Uruguay', 'chi': 'Chile', 'col': 'Colombia', 'ecu': 'Ecuador',
-  'per': 'Peru', 'hun': 'Hungary', 'rom': 'Romania', 'aut': 'Austria',
-  'gre': 'Greece', 'can': 'Canada', 'crc': 'Costa Rica',
-  'ksa': 'Saudi Arabia', 'qat': 'Qatar', 'chn': 'China', 'nzl': 'New Zealand',
-  'bih': 'Bosnia and Herzegovina', 'bosnia': 'Bosnia and Herzegovina', 'ukr': 'Ukraine'
+  'usa':'United States','us':'United States','usmnt':'United States',
+  'america':'United States','united states of america':'United States',
+  'eng':'England','sco':'Scotland','wal':'Wales','ireland':'Republic of Ireland',
+  'ger':'Germany','deutschland':'Germany',
+  'bra':'Brazil','brasil':'Brazil','arg':'Argentina','fra':'France',
+  'esp':'Spain','spa':'Spain','ita':'Italy',
+  'ned':'Netherlands','holland':'Netherlands','neth':'Netherlands',
+  'por':'Portugal','bel':'Belgium','cro':'Croatia','mex':'Mexico',
+  'jpn':'Japan','jap':'Japan',
+  'south korea':'South Korea','korea':'South Korea','kor':'South Korea',
+  'republic of korea':'South Korea',
+  'aus':'Australia','rus':'Russia','ussr':'Russia',
+  'czech republic':'Czech Republic','czechia':'Czech Republic','cze':'Czech Republic',
+  'sui':'Switzerland','swe':'Sweden','pol':'Poland','den':'Denmark',
+  'nga':'Nigeria','gha':'Ghana','sen':'Senegal','mar':'Morocco',
+  'cmr':'Cameroon','alg':'Algeria',
+  'uru':'Uruguay','chi':'Chile','col':'Colombia','ecu':'Ecuador',
+  'per':'Peru','hun':'Hungary','rom':'Romania','aut':'Austria',
+  'gre':'Greece','can':'Canada','crc':'Costa Rica',
+  'ksa':'Saudi Arabia','qat':'Qatar','chn':'China','nzl':'New Zealand',
+  'bih':'Bosnia and Herzegovina','bosnia':'Bosnia and Herzegovina','ukr':'Ukraine'
 };
 
 function resolveTeam(name) {
@@ -367,7 +364,6 @@ function extractTeams(text) {
   return { tA: tA, tB: tB };
 }
 
-/* ── Modal ──────────────────────────────────────────────────── */
 function openModal() {
   document.getElementById('api-url-input').value = API_URL;
   document.getElementById('modal').classList.add('open');
@@ -384,7 +380,6 @@ function saveApiUrl() {
   checkHealth();
 }
 
-/* ── Health check ───────────────────────────────────────────── */
 function checkHealth() {
   var dot = document.getElementById('status-dot');
   var txt = document.getElementById('status-text');
@@ -398,7 +393,6 @@ setInterval(checkHealth, 30000);
 checkHealth();
 if (!API_URL) { setTimeout(openModal, 1200); }
 
-/* ── Messaging ──────────────────────────────────────────────── */
 function sendMessage() {
   var text = inputEl.value.trim();
   if (!text) { return; }
@@ -464,7 +458,6 @@ function formatText(t) {
     .replace(/\n/g, '<br>');
 }
 
-/* ── Team stats sidebar ─────────────────────────────────────── */
 function loadStats() {
   var team = document.getElementById('team-input').value.trim();
   if (!team || !API_URL) { return; }
@@ -485,7 +478,6 @@ function loadStats() {
     }).catch(function() { alert('Could not load stats. Check API connection.'); });
 }
 
-/* ── Chart rendering ────────────────────────────────────────── */
 function safeRenderChart(data, wrapId) {
   if (chartRegistry[wrapId]) { chartRegistry[wrapId].destroy(); delete chartRegistry[wrapId]; }
   var wrap = document.getElementById(wrapId);
@@ -495,24 +487,21 @@ function safeRenderChart(data, wrapId) {
   wrap.appendChild(canvas);
   var ctx = canvas.getContext('2d');
   var noLegend = { legend: { display: false } };
-  var gridStyle = { color: 'rgba(255,255,255,0.05)' };
-  var xTicks = { color: '#7a8a9a' };
-  var yTicks = { color: '#7a8a9a' };
+  var gridFaint = { color: 'rgba(255,255,255,0.05)' };
+  var tickX = { color: '#7a8a9a' };
+  var tickY = { color: '#7a8a9a' };
   var chart = null;
-
   if (data.type === 'bar') {
     chart = new Chart(ctx, { type: 'bar',
       data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: data.colors, borderRadius: 6, borderSkipped: false }] },
-      options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
-        plugins: noLegend,
-        scales: { x: { ticks: xTicks, grid: gridStyle }, y: { ticks: yTicks, grid: gridStyle } } }
+      options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, plugins: noLegend,
+        scales: { x: { ticks: tickX, grid: gridFaint }, y: { ticks: tickY, grid: gridFaint } } }
     });
   } else if (data.type === 'bar_h') {
     chart = new Chart(ctx, { type: 'bar',
       data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: data.colors, borderRadius: 4, borderSkipped: false }] },
-      options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, indexAxis: 'y',
-        plugins: noLegend,
-        scales: { x: { ticks: xTicks, grid: gridStyle }, y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } } } }
+      options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, indexAxis: 'y', plugins: noLegend,
+        scales: { x: { ticks: tickX, grid: gridFaint }, y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } } } }
     });
   } else if (data.type === 'line') {
     chart = new Chart(ctx, { type: 'line',
@@ -521,7 +510,7 @@ function safeRenderChart(data, wrapId) {
       })},
       options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
         plugins: { legend: { labels: { color: '#e8eaf0', font: { family: 'Inter', size: 11 } } } },
-        scales: { x: { ticks: { color: '#7a8a9a', maxTicksLimit: 6, font: { size: 9 } }, grid: gridStyle }, y: { ticks: yTicks, grid: gridStyle } } }
+        scales: { x: { ticks: { color: '#7a8a9a', maxTicksLimit: 6, font: { size: 9 } }, grid: gridFaint }, y: { ticks: tickY, grid: gridFaint } } }
     });
   } else if (data.type === 'radar') {
     chart = new Chart(ctx, { type: 'radar',
@@ -538,14 +527,12 @@ function safeRenderChart(data, wrapId) {
   if (chart) { chartRegistry[wrapId] = chart; }
 }
 
-/* ── Chart button config ────────────────────────────────────── */
 function getChartConfig(userMsg) {
   var u = userMsg.trim();
   var uLow = u.toLowerCase();
   var hasVs = /\bvs\.?\b/i.test(u);
   var isPredictIntent = /\b(predict|prediction|h2h|head.to.head|compar|who\s+would\s+win|who\s+will\s+win|match\s+preview|match\s+report|forecast)\b/i.test(uLow);
   var isQuickPredict = /^predict(\s+the\s+match)?[\s:]/i.test(u);
-
   if (hasVs && (isPredictIntent || isQuickPredict)) {
     var teams = extractTeams(u);
     if (teams) {
@@ -555,7 +542,6 @@ function getChartConfig(userMsg) {
       ]};
     }
   }
-
   if (/\b(top\s+scor|all.time\s+scor|most\s+goals|leading\s+scor|best\s+scor)\b/i.test(uLow) && !/hat.?trick/i.test(uLow)) {
     var teamM = u.match(/\bfor\s+([A-Za-z][a-zA-Z\s]{2,20})\b/i);
     var rawTeam = teamM ? teamM[1].trim() : 'all';
@@ -564,87 +550,71 @@ function getChartConfig(userMsg) {
       { label: 'Top Scorers', endpoint: '/chart/top-scorers/' + encodeURIComponent(team), title: team === 'all' ? 'All-Time Top WC Scorers' : team + ' - Top WC Scorers' }
     ]};
   }
-
   if (!hasVs && /\b(record|recent\s+form|win\s+rate|world\s+cup\s+stats|wc\s+stats|performance)\b/i.test(uLow)) {
     var skipRe = /^(World|Cup|What|Tell|Show|Give|Which|Who|How|The|Stats|Record|Rate|Win|Recent|Form|Please|About)$/i;
     var anyTeamRe = /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)\b/g;
     var tm;
     while ((tm = anyTeamRe.exec(u)) !== null) {
-      var candidate = resolveTeam(tm[1]);
-      if (candidate.length > 2 && !skipRe.test(candidate)) {
+      var cand = resolveTeam(tm[1]);
+      if (cand.length > 2 && !skipRe.test(cand)) {
         return { chartable: true, charts: [
-          { label: 'Team Form', endpoint: '/chart/team-form/' + encodeURIComponent(candidate), title: candidate + ' - Recent Form' }
+          { label: 'Team Form', endpoint: '/chart/team-form/' + encodeURIComponent(cand), title: cand + ' - Recent Form' }
         ]};
       }
     }
   }
-
   if (/\b(most\s+goals|total\s+goals|highest\s+scor|goals\s+per\s+game)\b/i.test(uLow) && /\b(tournament|edition|world\s+cup)\b/i.test(uLow)) {
     return { chartable: true, charts: [
       { label: 'Tournament Goals', endpoint: '/chart/tournament-goals', title: 'Total Goals by World Cup Tournament' }
     ]};
   }
-
   return { chartable: false };
 }
 
-/* ── Attach chart buttons to bot bubble ─────────────────────── */
 function attachChartBtns(userMsg, bubbleEl, msgDiv) {
   var config = getChartConfig(userMsg);
   if (!config.chartable) { return; }
   var row = document.createElement('div');
   row.className = 'viz-btn-row';
-
   config.charts.forEach(function(cfg) {
     var uid = ++chartSeq;
     var btnId = 'vbtn-' + uid;
     var cardId = 'vcard-' + uid;
     var wrapId = 'vwrap-' + uid;
-
     var btn = document.createElement('button');
     btn.className = 'viz-btn';
     btn.id = btnId;
-
     var labelSpan = document.createElement('span');
     labelSpan.className = 'viz-btn-label';
     labelSpan.textContent = cfg.label;
-
     var tipSpan = document.createElement('span');
     tipSpan.className = 'viz-btn-tip';
     tipSpan.textContent = cfg.title;
-
     btn.appendChild(document.createTextNode('\uD83D\uDCCA '));
     btn.appendChild(labelSpan);
     btn.appendChild(tipSpan);
-
     var isOpen = false;
-
     btn.onclick = function() {
       if (isOpen) {
-        var existing = document.getElementById(cardId);
-        if (existing) {
+        var ex = document.getElementById(cardId);
+        if (ex) {
           if (chartRegistry[wrapId]) { chartRegistry[wrapId].destroy(); delete chartRegistry[wrapId]; }
-          existing.remove();
+          ex.remove();
         }
         isOpen = false;
         btn.classList.remove('active');
         return;
       }
-
       isOpen = true;
       btn.classList.add('active');
-
       var card = document.createElement('div');
       card.className = 'chart-card';
       card.id = cardId;
-
       var hdr = document.createElement('div');
       hdr.className = 'chart-hdr';
-
       var titleEl = document.createElement('div');
       titleEl.className = 'chart-title';
       titleEl.textContent = cfg.title;
-
       var closeBtn = document.createElement('button');
       closeBtn.className = 'chart-close';
       closeBtn.textContent = 'Close';
@@ -654,85 +624,78 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
         isOpen = false;
         btn.classList.remove('active');
       };
-
       hdr.appendChild(titleEl);
       hdr.appendChild(closeBtn);
-
       var wrapDiv = document.createElement('div');
       wrapDiv.className = 'chart-wrap';
       wrapDiv.id = wrapId;
       wrapDiv.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:.82rem;">Loading...</div>';
-
       card.appendChild(hdr);
       card.appendChild(wrapDiv);
-
       var anchor = msgDiv;
       var sib = msgDiv.nextElementSibling;
       while (sib && sib.classList && sib.classList.contains('chart-card')) { anchor = sib; sib = sib.nextElementSibling; }
       anchor.insertAdjacentElement('afterend', card);
       chatEl.scrollTop = chatEl.scrollHeight;
-
       fetch(API_URL + cfg.endpoint, { headers: { 'ngrok-skip-browser-warning': 'true' } })
         .then(function(r) { return r.json(); })
         .then(function(d) {
           var wrap = document.getElementById(wrapId);
           if (!wrap) { return; }
-          if (d.status === 'ok') {
-            safeRenderChart(d, wrapId);
-          } else {
-            wrap.innerHTML = '<div style="color:var(--muted);text-align:center;padding:2rem;font-size:.82rem;">No chart data available.</div>';
-          }
+          if (d.status === 'ok') { safeRenderChart(d, wrapId); }
+          else { wrap.innerHTML = '<div style="color:var(--muted);text-align:center;padding:2rem;font-size:.82rem;">No chart data available.</div>'; }
         })
         .catch(function() {
           var wrap = document.getElementById(wrapId);
           if (wrap) { wrap.innerHTML = '<div style="color:#e74c3c;text-align:center;padding:2rem;font-size:.82rem;">Failed to load chart.</div>'; }
         });
     };
-
     row.appendChild(btn);
   });
-
   bubbleEl.appendChild(row);
 }
 
-/* ── Prediction donut ───────────────────────────────────────── */
+/* ── Prediction donut ───────────────────────────────────────────────────────
+   Gate on USER intent (vs + predict keyword).
+   Then extract probabilities from bot response with NO context requirement —
+   any % near a team name is valid. This is the key fix: the old code required
+   "win/chance/probability" within 50 chars of the %, which silently failed for
+   responses formatted as "Germany: 52%" or bullet-point style outputs.
+   ───────────────────────────────────────────────────────────────────────── */
 function tryUpdateDonut(userMsg, botResp) {
   var hasVs = /\bvs\.?\b/i.test(userMsg);
   var isPredictIntent = /\b(predict|h2h|head.to.head|who\s+would\s+win|who\s+will\s+win|match\s+preview|match\s+report|forecast|compar)\b/i.test(userMsg);
   var isQuickPredict = /^predict(\s+the\s+match)?[\s:]/i.test(userMsg);
   if (!hasVs || (!isPredictIntent && !isQuickPredict)) { return; }
-
   var teams = extractTeams(userMsg) || extractTeams(botResp);
   if (!teams) { return; }
-
   var pcts = extractProbabilities(botResp, teams.tA, teams.tB);
-  if (pcts) {
-    renderPredDonut(teams.tA, teams.tB, pcts);
-  } else {
-    renderPredDonutPending(teams.tA, teams.tB);
-  }
+  if (pcts) { renderPredDonut(teams.tA, teams.tB, pcts); }
+  else { renderPredDonutPending(teams.tA, teams.tB); }
 }
 
 function extractProbabilities(text, tA, tB) {
-  var clean = text.replace(/\n/g, ' ');
+  /* Strip markdown bold markers so "**Germany**" becomes "Germany" */
+  var clean = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/\n/g, ' ');
 
   function escRe(s) { return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
 
-  var predCtxRe = /win|chance|probabilit|likelihood|favour|favor|advantage|edge|predict|lean/i;
-
+  /* Strategy 1 — find any % within 80 chars of a team name, no context gate */
   function findTeamPct(team) {
     var esc = escRe(team);
-    var fwdRe = new RegExp(esc + '[^.]{0,100}?(\\d{1,3})\\s*%', 'i');
+    /* Forward: team name then % */
+    var fwdRe = new RegExp(esc + '[^.]{0,80}?(\\d{1,3})\\s*%', 'i');
     var fwdM = clean.match(fwdRe);
     if (fwdM) {
-      var ctx = clean.slice(Math.max(0, fwdM.index - 30), fwdM.index + fwdM[0].length + 50);
-      if (predCtxRe.test(ctx)) { return parseInt(fwdM[1], 10); }
+      var v = parseInt(fwdM[1], 10);
+      if (v >= 1 && v <= 99) { return v; }
     }
-    var bwdRe = new RegExp('(\\d{1,3})\\s*%[^.]{0,100}?' + esc, 'i');
+    /* Backward: % then team name */
+    var bwdRe = new RegExp('(\\d{1,3})\\s*%[^.]{0,80}?' + esc, 'i');
     var bwdM = clean.match(bwdRe);
     if (bwdM) {
-      var ctx2 = clean.slice(Math.max(0, bwdM.index - 30), bwdM.index + bwdM[0].length + 50);
-      if (predCtxRe.test(ctx2)) { return parseInt(bwdM[1], 10); }
+      var v2 = parseInt(bwdM[1], 10);
+      if (v2 >= 1 && v2 <= 99) { return v2; }
     }
     return null;
   }
@@ -740,20 +703,12 @@ function extractProbabilities(text, tA, tB) {
   var pA = findTeamPct(tA);
   var pB = findTeamPct(tB);
 
+  /* Strategy 2 — scan all % values and find a pair whose remainder (draw) is 0-40 */
   if (pA === null || pB === null) {
-    var sections = clean.split(/\.\s+/);
-    var bestSection = '';
-    var bestScore = 0;
-    var si;
-    for (si = 0; si < sections.length; si++) {
-      var sc = (sections[si].match(/\d{1,3}\s*%/g) || []).length + (predCtxRe.test(sections[si]) ? 2 : 0);
-      if (sc > bestScore) { bestScore = sc; bestSection = sections[si]; }
-    }
-    var source = bestScore > 0 ? bestSection : clean;
     var allPcts = [];
     var pctRe = /(\d{1,3})\s*%/g;
     var pm;
-    while ((pm = pctRe.exec(source)) !== null) {
+    while ((pm = pctRe.exec(clean)) !== null) {
       var n = parseInt(pm[1], 10);
       if (n >= 1 && n <= 99) { allPcts.push(n); }
     }
@@ -761,17 +716,18 @@ function extractProbabilities(text, tA, tB) {
     var i, j;
     for (i = 0; i < allPcts.length - 1 && !found; i++) {
       for (j = i + 1; j < allPcts.length && !found; j++) {
-        var remainder = 100 - allPcts[i] - allPcts[j];
-        if (remainder >= 0 && remainder <= 40) {
+        var rem = 100 - allPcts[i] - allPcts[j];
+        if (rem >= 0 && rem <= 40) {
           if (pA === null) { pA = allPcts[i]; }
           if (pB === null) { pB = allPcts[j]; }
           found = true;
         }
       }
     }
+    /* Strategy 3 — use two largest plausible values */
     if (!found && allPcts.length >= 2) {
       var sorted = allPcts.slice().sort(function(a, b) { return b - a; });
-      if (sorted[0] > 30 && sorted[1] > 10 && sorted[0] + sorted[1] <= 100) {
+      if (sorted[0] >= 20 && sorted[1] >= 10 && sorted[0] + sorted[1] <= 100) {
         if (pA === null) { pA = sorted[0]; }
         if (pB === null) { pB = sorted[1]; }
       }
@@ -791,11 +747,11 @@ function extractProbabilities(text, tA, tB) {
 
 function swapDonutCanvas() {
   if (predChart) { predChart.destroy(); predChart = null; }
-  var oldCanvas = document.getElementById('pred-donut');
-  var newCanvas = document.createElement('canvas');
-  newCanvas.id = 'pred-donut';
-  oldCanvas.parentNode.replaceChild(newCanvas, oldCanvas);
-  return newCanvas;
+  var old = document.getElementById('pred-donut');
+  var nc = document.createElement('canvas');
+  nc.id = 'pred-donut';
+  old.parentNode.replaceChild(nc, old);
+  return nc;
 }
 
 function showPredArea(tA, tB) {
@@ -805,9 +761,7 @@ function showPredArea(tA, tB) {
 }
 
 function renderPredDonut(tA, tB, pcts) {
-  var pA = pcts.pA;
-  var draw = pcts.draw;
-  var pB = pcts.pB;
+  var pA = pcts.pA, draw = pcts.draw, pB = pcts.pB;
   showPredArea(tA, tB);
   var winner = pA >= pB ? tA : tB;
   document.getElementById('pred-center-pct').textContent = Math.max(pA, pB) + '%';
@@ -821,23 +775,20 @@ function renderPredDonut(tA, tB, pcts) {
   ];
   for (var ri = 0; ri < rows.length; ri++) {
     var r = rows[ri];
-    var rowDiv = document.createElement('div');
-    rowDiv.className = 'pred-leg-row';
-    rowDiv.innerHTML = '<div class="pred-leg-dot" style="background:' + r.color + '"></div>' +
+    var rd = document.createElement('div');
+    rd.className = 'pred-leg-row';
+    rd.innerHTML = '<div class="pred-leg-dot" style="background:' + r.color + '"></div>' +
       '<div class="pred-leg-name">' + r.label + '</div>' +
       '<div class="pred-leg-pct">' + r.pct + '%</div>';
-    legEl.appendChild(rowDiv);
+    legEl.appendChild(rd);
   }
-  var newCanvas = swapDonutCanvas();
-  predChart = new Chart(newCanvas.getContext('2d'), {
+  var nc = swapDonutCanvas();
+  predChart = new Chart(nc.getContext('2d'), {
     type: 'doughnut',
-    data: {
-      labels: [tA, 'Draw', tB],
-      datasets: [{ data: [pA, draw, pB],
-        backgroundColor: PRED_COLORS,
+    data: { labels: [tA, 'Draw', tB],
+      datasets: [{ data: [pA, draw, pB], backgroundColor: PRED_COLORS,
         borderColor: [PRED_COLORS[0] + '88', PRED_COLORS[1] + '88', PRED_COLORS[2] + '88'],
-        borderWidth: 2, hoverOffset: 5 }]
-    },
+        borderWidth: 2, hoverOffset: 5 }] },
     options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
       animation: { animateRotate: true, duration: 700 },
       plugins: { legend: { display: false },
@@ -853,21 +804,19 @@ function renderPredDonutPending(tA, tB) {
   document.getElementById('pred-center-sub').textContent = 'NO DATA';
   var legEl = document.getElementById('pred-legend');
   legEl.innerHTML = '<div style="font-size:.7rem;color:var(--muted);text-align:center;padding:.3rem 0;">No probability data in response.</div>';
-  var newCanvas = swapDonutCanvas();
-  predChart = new Chart(newCanvas.getContext('2d'), {
+  var nc = swapDonutCanvas();
+  predChart = new Chart(nc.getContext('2d'), {
     type: 'doughnut',
     data: { labels: [tA, tB],
       datasets: [{ data: [50, 50],
         backgroundColor: ['rgba(201,168,76,0.18)', 'rgba(45,106,79,0.18)'],
-        borderColor: ['rgba(201,168,76,0.3)', 'rgba(45,106,79,0.3)'],
-        borderWidth: 1 }] },
+        borderColor: ['rgba(201,168,76,0.3)', 'rgba(45,106,79,0.3)'], borderWidth: 1 }] },
     options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
       animation: { animateRotate: true, duration: 500 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } } }
   });
 }
 
-/* ── Input handlers ─────────────────────────────────────────── */
 inputEl.addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
