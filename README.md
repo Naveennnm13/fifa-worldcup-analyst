@@ -203,9 +203,9 @@ A `ConversationBufferMemory` maintains session context, and baseline instruction
 
 | Member | Role |
 |--------|------|
-| \*\*Naveen\*\* | LangChain agent architecture, FastAPI backend, Vercel deployment |
-| \*\*Gargi\*\* | Data engineering, team name normalisation pipeline, ELO/FIFA feature merging |
-| \*\*Venkat\*\* | Project documentation, presentation design, narrative structure |
+| \*\*Naveen\*\* | LangChain agent architecture, Colab Notebook creation, FastAPI backend, Vercel deployment |
+| \*\*Gargi\*\* | Data engineering, Dataset sourcing & Cleaning, team name normalisation pipeline, ELO/FIFA feature merging |
+| \*\*Venkat\*\* | Project documentation, presentation design, narrative structure, Testing |
 
 > For educational purposes only. Not professional sports analytics or betting advice.
 
