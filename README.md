@@ -190,6 +190,53 @@ A `ConversationBufferMemory` maintains session context, and baseline instruction
 
 ---
 
+## 🧠 Prompts
+
+The agent's behaviour is shaped at three levels: a system prompt, pre-injected memory that seeds baseline rules at startup, and per-tool docstrings that act as routing instructions for the LLM.
+
+### 1. System Prompt
+
+Passed to `create_tool_calling_agent` via `ChatPromptTemplate`. Controls the agent's persona, anti-hallucination rules, temporal context, and tool usage instructions:
+system_prompt = """You are an expert FIFA World Cup analyst, football historian, and
+match prediction assistant with deep knowledge of global football.
+
+CRITICAL ANTI-HALLUCINATION RULES:
+1. NEVER state a statistic you have not retrieved from a tool in this conversation.
+2. ALWAYS call reasoning_or_aggregation_tool FIRST for ANY prediction or comparison.
+3. ALWAYS call data_ingestion_tool before stating any team's win rate, goals, or record.
+4. NEVER invent ELO scores, FIFA ratings, win percentages, or match results.
+5. If a tool returns no data, say so explicitly — do not substitute with guesses.
+6. Clearly separate: (a) what the data shows, (b) your conclusion.
+7. Always end predictions with: data covers up to 2022 only.
+
+TEMPORAL CONTEXT:
+- Most recent WC: Qatar 2022 — Argentina beat France on penalties.
+- Next WC: USA, Canada & Mexico 2026 — not yet played.
+- Never refuse a prediction — always use the data tools.
+
+The `{style_instruction}` placeholder is filled at runtime based on the user's selected style. **Detailed with bullet points** formats responses with clear bullet points including all stats and reasoning. **Short summary** responds in 2–3 sentences covering the key insight only. **Stats-heavy** leads with raw numbers and statistics, minimising narrative.
+
+### 2. Pre-Injected Memory
+
+Two rule pairs are injected into `ConversationBufferMemory` before any user message to enforce consistent behaviour across the session:
+```python
+memory.chat_memory.add_user_message("Keep all predictions strictly data-driven and unbiased.")
+memory.chat_memory.add_ai_message("Understood. All responses grounded in historical data only.")
+memory.chat_memory.add_user_message("Always state data limitations at the end of predictions.")
+memory.chat_memory.add_ai_message("Noted. Limitations disclaimer included in every prediction.")
+```
+
+### 3. Prompt Template Structure
+```python
+prompt = ChatPromptTemplate.from_messages([
+    ("system", system_prompt),                             # Rules + tool map
+    MessagesPlaceholder(variable_name="chat_history"),     # Conversation memory
+    ("human", "{input}"),                                  # Current user query
+    MessagesPlaceholder(variable_name="agent_scratchpad"), # Tool call loop
+])
+```
+---
+
 ## ⚠️ Limitations
 
 * Data covers World Cup history **up to 2022** only
