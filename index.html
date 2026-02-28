@@ -139,9 +139,7 @@ header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-be
 </style>
 </head>
 <body>
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
 <div id="app">
 
 <header>
@@ -349,11 +347,9 @@ function resolveTeam(name) {
   var key = name.trim().toLowerCase();
   return TEAM_ALIASES[key] || name.trim();
 }
-
 function cleanTeamName(raw) {
   return raw.replace(/^(predict(\s+the\s+match)?[\s:]+|tell\s+me|show|get|compare|analyse|analyze|give|about|between|for)\s*/i, '').trim();
 }
-
 function extractTeams(text) {
   var re = /([A-Za-z][A-Za-z\s]{0,22}?)\s+vs\.?\s+([A-Za-z][A-Za-z\s]{0,22}?)(?=\s*[^A-Za-z]|$)/i;
   var m = text.match(re);
@@ -364,18 +360,12 @@ function extractTeams(text) {
   return { tA: tA, tB: tB };
 }
 
-function openModal() {
-  document.getElementById('api-url-input').value = API_URL;
-  document.getElementById('modal').classList.add('open');
-}
+function openModal() { document.getElementById('api-url-input').value = API_URL; document.getElementById('modal').classList.add('open'); }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 function saveApiUrl() {
   var v = document.getElementById('api-url-input').value.trim().replace(/\/$/, '');
   if (!v) { alert('Please enter a valid URL.'); return; }
-  API_URL = v;
-  localStorage.setItem('wc_api_url', v);
-  closeModal();
-  checkHealth();
+  API_URL = v; localStorage.setItem('wc_api_url', v); closeModal(); checkHealth();
 }
 
 function checkHealth() {
@@ -395,8 +385,7 @@ function sendMessage() {
   var text = inputEl.value.trim();
   if (!text) { return; }
   if (!API_URL) { openModal(); return; }
-  inputEl.value = '';
-  inputEl.style.height = 'auto';
+  inputEl.value = ''; inputEl.style.height = 'auto';
   if (welcomeEl) { welcomeEl.style.display = 'none'; }
   appendMsg('user', text);
   var typingEl = appendTyping();
@@ -406,21 +395,19 @@ function sendMessage() {
     headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
     body: JSON.stringify({ message: text, style: style }),
     signal: AbortSignal.timeout(60000)
-  }).then(function(r) {
-    return r.json();
-  }).then(function(d) {
-    typingEl.remove();
-    var resp = d.response || 'No response received.';
-    var msgDiv = appendMsg('bot', resp);
-    var bub = msgDiv.querySelector('.bubble.bot');
-    attachChartBtns(text, bub, msgDiv);
-    tryUpdateDonut(text, resp);
-  }).catch(function(e) {
-    typingEl.remove();
-    appendMsg('bot', 'Could not reach the API. Make sure your Colab session is running.\n\nError: ' + e.message);
-  });
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      typingEl.remove();
+      var resp = d.response || 'No response received.';
+      var msgDiv = appendMsg('bot', resp);
+      var bub = msgDiv.querySelector('.bubble.bot');
+      attachChartBtns(text, bub, msgDiv);
+      tryUpdateDonut(text, resp);
+    }).catch(function(e) {
+      typingEl.remove();
+      appendMsg('bot', 'Could not reach the API. Make sure your Colab session is running.\n\nError: ' + e.message);
+    });
 }
-
 function quickSend(text) { inputEl.value = text; sendMessage(); }
 
 function appendMsg(role, text) {
@@ -432,28 +419,22 @@ function appendMsg(role, text) {
   var bub = document.createElement('div');
   bub.className = 'bubble ' + role;
   bub.innerHTML = formatText(text);
-  div.appendChild(ava);
-  div.appendChild(bub);
-  chatEl.appendChild(div);
-  chatEl.scrollTop = chatEl.scrollHeight;
+  div.appendChild(ava); div.appendChild(bub);
+  chatEl.appendChild(div); chatEl.scrollTop = chatEl.scrollHeight;
   return div;
 }
-
 function appendTyping() {
   var div = document.createElement('div');
   div.className = 'msg';
   div.innerHTML = '<div class="avatar bot">\u26BD</div><div class="bubble bot"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>';
-  chatEl.appendChild(div);
-  chatEl.scrollTop = chatEl.scrollHeight;
+  chatEl.appendChild(div); chatEl.scrollTop = chatEl.scrollHeight;
   return div;
 }
-
 function formatText(t) {
-  return t
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/\n/g, '<br>');
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/\n/g,'<br>');
 }
 
 function loadStats() {
@@ -470,9 +451,7 @@ function loadStats() {
         document.getElementById('s-gf').textContent = s.goals_for;
         document.getElementById('s-ga').textContent = s.goals_against;
         document.getElementById('s-gd').textContent = (s.goal_diff > 0 ? '+' : '') + s.goal_diff;
-      } else {
-        alert('No World Cup data found for "' + team + '". Try the full country name.');
-      }
+      } else { alert('No World Cup data found for "' + team + '". Try the full country name.'); }
     }).catch(function() { alert('Could not load stats. Check API connection.'); });
 }
 
@@ -481,8 +460,7 @@ function safeRenderChart(data, wrapId) {
   var wrap = document.getElementById(wrapId);
   if (!wrap) { return; }
   var canvas = document.createElement('canvas');
-  wrap.innerHTML = '';
-  wrap.appendChild(canvas);
+  wrap.innerHTML = ''; wrap.appendChild(canvas);
   var ctx = canvas.getContext('2d');
   var noLegend = { legend: { display: false } };
   var gridFaint = { color: 'rgba(255,255,255,0.05)' };
@@ -554,16 +532,12 @@ function getChartConfig(userMsg) {
     while ((tm = anyTeamRe.exec(u)) !== null) {
       var cand = resolveTeam(tm[1]);
       if (cand.length > 2 && !skipRe.test(cand)) {
-        return { chartable: true, charts: [
-          { label: 'Team Form', endpoint: '/chart/team-form/' + encodeURIComponent(cand), title: cand + ' - Recent Form' }
-        ]};
+        return { chartable: true, charts: [{ label: 'Team Form', endpoint: '/chart/team-form/' + encodeURIComponent(cand), title: cand + ' - Recent Form' }]};
       }
     }
   }
   if (/\b(most\s+goals|total\s+goals|highest\s+scor|goals\s+per\s+game)\b/i.test(uLow) && /\b(tournament|edition|world\s+cup)\b/i.test(uLow)) {
-    return { chartable: true, charts: [
-      { label: 'Tournament Goals', endpoint: '/chart/tournament-goals', title: 'Total Goals by World Cup Tournament' }
-    ]};
+    return { chartable: true, charts: [{ label: 'Tournament Goals', endpoint: '/chart/tournament-goals', title: 'Total Goals by World Cup Tournament' }]};
   }
   return { chartable: false };
 }
@@ -579,56 +553,30 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
     var cardId = 'vcard-' + uid;
     var wrapId = 'vwrap-' + uid;
     var btn = document.createElement('button');
-    btn.className = 'viz-btn';
-    btn.id = btnId;
-    var labelSpan = document.createElement('span');
-    labelSpan.className = 'viz-btn-label';
-    labelSpan.textContent = cfg.label;
-    var tipSpan = document.createElement('span');
-    tipSpan.className = 'viz-btn-tip';
-    tipSpan.textContent = cfg.title;
-    btn.appendChild(document.createTextNode('\uD83D\uDCCA '));
-    btn.appendChild(labelSpan);
-    btn.appendChild(tipSpan);
+    btn.className = 'viz-btn'; btn.id = btnId;
+    var labelSpan = document.createElement('span'); labelSpan.className = 'viz-btn-label'; labelSpan.textContent = cfg.label;
+    var tipSpan = document.createElement('span'); tipSpan.className = 'viz-btn-tip'; tipSpan.textContent = cfg.title;
+    btn.appendChild(document.createTextNode('\uD83D\uDCCA ')); btn.appendChild(labelSpan); btn.appendChild(tipSpan);
     var isOpen = false;
     btn.onclick = function() {
       if (isOpen) {
         var ex = document.getElementById(cardId);
-        if (ex) {
-          if (chartRegistry[wrapId]) { chartRegistry[wrapId].destroy(); delete chartRegistry[wrapId]; }
-          ex.remove();
-        }
-        isOpen = false;
-        btn.classList.remove('active');
-        return;
+        if (ex) { if (chartRegistry[wrapId]) { chartRegistry[wrapId].destroy(); delete chartRegistry[wrapId]; } ex.remove(); }
+        isOpen = false; btn.classList.remove('active'); return;
       }
-      isOpen = true;
-      btn.classList.add('active');
-      var card = document.createElement('div');
-      card.className = 'chart-card';
-      card.id = cardId;
-      var hdr = document.createElement('div');
-      hdr.className = 'chart-hdr';
-      var titleEl = document.createElement('div');
-      titleEl.className = 'chart-title';
-      titleEl.textContent = cfg.title;
-      var closeBtn = document.createElement('button');
-      closeBtn.className = 'chart-close';
-      closeBtn.textContent = 'Close';
+      isOpen = true; btn.classList.add('active');
+      var card = document.createElement('div'); card.className = 'chart-card'; card.id = cardId;
+      var hdr = document.createElement('div'); hdr.className = 'chart-hdr';
+      var titleEl = document.createElement('div'); titleEl.className = 'chart-title'; titleEl.textContent = cfg.title;
+      var closeBtn = document.createElement('button'); closeBtn.className = 'chart-close'; closeBtn.textContent = 'Close';
       closeBtn.onclick = function() {
         if (chartRegistry[wrapId]) { chartRegistry[wrapId].destroy(); delete chartRegistry[wrapId]; }
-        card.remove();
-        isOpen = false;
-        btn.classList.remove('active');
+        card.remove(); isOpen = false; btn.classList.remove('active');
       };
-      hdr.appendChild(titleEl);
-      hdr.appendChild(closeBtn);
-      var wrapDiv = document.createElement('div');
-      wrapDiv.className = 'chart-wrap';
-      wrapDiv.id = wrapId;
+      hdr.appendChild(titleEl); hdr.appendChild(closeBtn);
+      var wrapDiv = document.createElement('div'); wrapDiv.className = 'chart-wrap'; wrapDiv.id = wrapId;
       wrapDiv.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:.82rem;">Loading...</div>';
-      card.appendChild(hdr);
-      card.appendChild(wrapDiv);
+      card.appendChild(hdr); card.appendChild(wrapDiv);
       var anchor = msgDiv;
       var sib = msgDiv.nextElementSibling;
       while (sib && sib.classList && sib.classList.contains('chart-card')) { anchor = sib; sib = sib.nextElementSibling; }
@@ -641,8 +589,7 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
           if (!wrap) { return; }
           if (d.status === 'ok') { safeRenderChart(d, wrapId); }
           else { wrap.innerHTML = '<div style="color:var(--muted);text-align:center;padding:2rem;font-size:.82rem;">No chart data available.</div>'; }
-        })
-        .catch(function() {
+        }).catch(function() {
           var wrap = document.getElementById(wrapId);
           if (wrap) { wrap.innerHTML = '<div style="color:#e74c3c;text-align:center;padding:2rem;font-size:.82rem;">Failed to load chart.</div>'; }
         });
@@ -652,42 +599,27 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
   bubbleEl.appendChild(row);
 }
 
-/* ── Donut helpers ────────────────────────────────────────────── */
+/* ── Donut helpers ── */
 function swapDonutCanvas() {
   if (predChart) { predChart.destroy(); predChart = null; }
   var old = document.getElementById('pred-donut');
-  var nc = document.createElement('canvas');
-  nc.id = 'pred-donut';
-  old.parentNode.replaceChild(nc, old);
-  return nc;
+  var nc = document.createElement('canvas'); nc.id = 'pred-donut';
+  old.parentNode.replaceChild(nc, old); return nc;
 }
-
 function showPredArea(tA, tB) {
   document.getElementById('pred-idle').style.display = 'none';
   document.getElementById('pred-chart-area').style.display = 'block';
   document.getElementById('pred-match-label').textContent = tA + ' vs ' + tB;
 }
-
 function buildLegend(tA, pA, draw, tB, pB) {
-  var legEl = document.getElementById('pred-legend');
-  legEl.innerHTML = '';
-  var rows = [
-    { label: tA, pct: pA, color: PRED_COLORS[0] },
-    { label: 'Draw', pct: draw, color: PRED_COLORS[1] },
-    { label: tB, pct: pB, color: PRED_COLORS[2] }
-  ];
-  var ri;
-  for (ri = 0; ri < rows.length; ri++) {
-    var r = rows[ri];
-    var rd = document.createElement('div');
-    rd.className = 'pred-leg-row';
-    rd.innerHTML = '<div class="pred-leg-dot" style="background:' + r.color + '"></div>' +
-      '<div class="pred-leg-name">' + r.label + '</div>' +
-      '<div class="pred-leg-pct">' + r.pct + '%</div>';
+  var legEl = document.getElementById('pred-legend'); legEl.innerHTML = '';
+  var rows = [{ label: tA, pct: pA, color: PRED_COLORS[0] }, { label: 'Draw', pct: draw, color: PRED_COLORS[1] }, { label: tB, pct: pB, color: PRED_COLORS[2] }];
+  for (var ri = 0; ri < rows.length; ri++) {
+    var r = rows[ri]; var rd = document.createElement('div'); rd.className = 'pred-leg-row';
+    rd.innerHTML = '<div class="pred-leg-dot" style="background:' + r.color + '"></div><div class="pred-leg-name">' + r.label + '</div><div class="pred-leg-pct">' + r.pct + '%</div>';
     legEl.appendChild(rd);
   }
 }
-
 function renderPredDonut(tA, tB, pcts) {
   var pA = pcts.pA, draw = pcts.draw, pB = pcts.pB;
   showPredArea(tA, tB);
@@ -698,19 +630,12 @@ function renderPredDonut(tA, tB, pcts) {
   var nc = swapDonutCanvas();
   predChart = new Chart(nc.getContext('2d'), {
     type: 'doughnut',
-    data: { labels: [tA, 'Draw', tB],
-      datasets: [{ data: [pA, draw, pB], backgroundColor: PRED_COLORS,
-        borderColor: [PRED_COLORS[0] + '88', PRED_COLORS[1] + '88', PRED_COLORS[2] + '88'],
-        borderWidth: 2, hoverOffset: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
-      animation: { animateRotate: true, duration: 700 },
-      plugins: { legend: { display: false },
-        tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.parsed + '%'; } },
-          backgroundColor: 'rgba(10,14,26,0.9)', titleColor: '#c9a84c',
-          bodyColor: '#e8eaf0', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 } } }
+    data: { labels: [tA, 'Draw', tB], datasets: [{ data: [pA, draw, pB], backgroundColor: PRED_COLORS, borderColor: [PRED_COLORS[0] + '88', PRED_COLORS[1] + '88', PRED_COLORS[2] + '88'], borderWidth: 2, hoverOffset: 5 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { animateRotate: true, duration: 700 },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.parsed + '%'; } },
+        backgroundColor: 'rgba(10,14,26,0.9)', titleColor: '#c9a84c', bodyColor: '#e8eaf0', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 } } }
   });
 }
-
 function renderPredDonutPending(tA, tB) {
   showPredArea(tA, tB);
   document.getElementById('pred-center-pct').textContent = '-';
@@ -720,42 +645,20 @@ function renderPredDonutPending(tA, tB) {
   var nc = swapDonutCanvas();
   predChart = new Chart(nc.getContext('2d'), {
     type: 'doughnut',
-    data: { labels: [tA, tB],
-      datasets: [{ data: [50, 50],
-        backgroundColor: ['rgba(201,168,76,0.18)', 'rgba(45,106,79,0.18)'],
-        borderColor: ['rgba(201,168,76,0.3)', 'rgba(45,106,79,0.3)'], borderWidth: 1 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
-      animation: { animateRotate: true, duration: 500 },
-      plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+    data: { labels: [tA, tB], datasets: [{ data: [50, 50], backgroundColor: ['rgba(201,168,76,0.18)', 'rgba(45,106,79,0.18)'], borderColor: ['rgba(201,168,76,0.3)', 'rgba(45,106,79,0.3)'], borderWidth: 1 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { animateRotate: true, duration: 500 }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
   });
 }
 
-/* ── Probability extraction ───────────────────────────────────────
-   The bot response has two kinds of percentages:
-   (A) Stat %  e.g. "Win Rate: 60%", "ELO difference: 22%"  => IGNORE
-   (B) Prob %  e.g. "France has a 57% chance of winning"    => USE
+/* ── Probability extraction ── */
+function escapeRe(s) { return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
+function clampVal(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
-   Strategy 1: find % that is preceded or followed by explicit
-               probability words (chance, probability, likelihood,
-               odds). Stat-context words nearby disqualify it.
-   Strategy 2: scan only the Prediction paragraph for a % trio.
-   Strategy 3: qualitative sentence scoring as final fallback.
-   ──────────────────────────────────────────────────────────────── */
-
-function escapeRegex(s) {
-  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-}
-
-function hasProbWord(ctx) {
-  return /chance|probabilit|likelihood|likely\s+to\s+win|win\s+probability|expected\s+to\s+win|odds\s+of/.test(ctx.toLowerCase());
-}
-
-function hasStatWord(ctx) {
-  return /win\s+rate|win\s+%|win\s+percentage|success\s+rate|historical|matches\s+played|goals\s+scored|goals\s+conceded|average\s+goals|elo\s+|rating|overall\s+\d|attack\s+\d|defense\s+\d/.test(ctx.toLowerCase());
-}
+function hasProbWord(ctx) { return /chance|probabilit|likelihood|likely\s+to\s+win|win\s+probability|expected\s+to\s+win|odds\s+of/.test(ctx.toLowerCase()); }
+function hasStatWord(ctx) { return /win\s+rate|win\s+%|win\s+percentage|success\s+rate|historical|matches\s+played|goals\s+scored|goals\s+conceded|average\s+goals|elo\s+|rating|overall\s+\d|attack\s+\d|defense\s+\d/.test(ctx.toLowerCase()); }
 
 function findExplicitPct(clean, team) {
-  var e = escapeRegex(team);
+  var e = escapeRe(team);
   var fwdRe = new RegExp(e + '[^.]{0,70}?(\\d{1,3})\\s*%', 'i');
   var fm = clean.match(fwdRe);
   if (fm) {
@@ -773,85 +676,145 @@ function findExplicitPct(clean, team) {
   return null;
 }
 
-function extractQualitative(clean, tA, tB) {
-  var lower = clean.toLowerCase();
-  var aKey = tA.toLowerCase();
-  var bKey = tB.toLowerCase();
-  var predWords = /predict|favour|favor|advantage|edge|likely|lean|expected|better|superior|stronger|verdict|favou?red|recommend|tip|suggest|despite/;
-  var strongWords = /heavily|strongly|clearly|dominant|significantly|much\s+better|far\s+superior|considerably|commanding/;
+/* Priority 1: ELO-based formula (fires when backend returns ELO scores) */
+function tryEloProb(lower, aKey, bKey) {
+  var eloRe = /1[4-9]\d{2}\.?\d*/g;
+  var aEsc = escapeRe(aKey);
+  var bEsc = escapeRe(bKey);
+  function findEloNear(teamEsc) {
+    var fwd = new RegExp(teamEsc + '[^\\n.]{0,40}?(1[4-9]\\d{2}\\.?\\d*)', 'i');
+    var fm = lower.match(fwd);
+    if (fm) { return parseFloat(fm[1]); }
+    var bwd = new RegExp('(1[4-9]\\d{2}\\.?\\d*)[^\\n.]{0,40}?' + teamEsc, 'i');
+    var bm = lower.match(bwd);
+    return bm ? parseFloat(bm[1]) : null;
+  }
+  var eloA = findEloNear(aEsc);
+  var eloB = findEloNear(bEsc);
+  if (eloA === null || eloB === null || eloA <= 0 || eloB <= 0) { return null; }
+  var diff = eloA - eloB;
+  var rawWin = 1 / (1 + Math.pow(10, -diff / 400));
+  var absDiff = diff < 0 ? -diff : diff;
+  var drawFactor = clampVal(0.25 - absDiff / 2000, 0.10, 0.28);
+  var pA = Math.round(rawWin * (1 - drawFactor) * 100);
+  var pB = Math.round((1 - rawWin) * (1 - drawFactor) * 100);
+  pA = clampVal(pA, 12, 74); pB = clampVal(pB, 12, 74);
+  var draw = Math.max(8, 100 - pA - pB);
+  return { pA: pA, draw: draw, pB: pB };
+}
+
+/* Priority 2: Form win-rate ratio */
+function tryFormRateProb(lower, aKey, bKey) {
+  var aEsc = escapeRe(aKey);
+  var bEsc = escapeRe(bKey);
+  function findRate(teamEsc) {
+    var fwd = new RegExp(teamEsc + '[^.]{0,60}?win\\s*rate[^.]{0,25}?(\\d+\\.?\\d*)\\s*%', 'i');
+    var fm = lower.match(fwd);
+    if (fm) { return parseFloat(fm[1]); }
+    var bwd = new RegExp('win\\s*rate[^.]{0,25}?(\\d+\\.?\\d*)\\s*%[^.]{0,60}?' + teamEsc, 'i');
+    fm = lower.match(bwd);
+    return fm ? parseFloat(fm[1]) : null;
+  }
+  var rA = findRate(aEsc);
+  var rB = findRate(bEsc);
+  if (rA === null || rB === null || rA + rB <= 0) { return null; }
+  var prop = rA / (rA + rB);
+  var drawR = 22;
+  var pA = clampVal(Math.round(prop * (100 - drawR)), 12, 74);
+  var pB = clampVal(100 - drawR - pA, 12, 74);
+  drawR = Math.max(8, 100 - pA - pB);
+  return { pA: pA, draw: drawR, pB: pB };
+}
+
+/* Priority 3: Variable qualitative sentence scoring */
+function tryQualitativeProb(lower, aKey, bKey) {
+  var PRED = /predict|favour|favor|advantage|edge|likely|lean|expected|better|superior|stronger|verdict|favou?red|tip|suggest|despite/;
+  var STRONG = /heavily|strongly|clearly|dominant|significantly|much\s+better|far\s+superior|considerably/;
   var sentences = lower.split(/[.!?]+/);
-  var aScore = 0;
-  var bScore = 0;
+  var aScore = 0, bScore = 0;
   var si, sent, hasA, hasB, pts;
   for (si = 0; si < sentences.length; si++) {
     sent = sentences[si];
-    if (!predWords.test(sent)) { continue; }
+    if (!PRED.test(sent)) { continue; }
     hasA = sent.indexOf(aKey) >= 0;
     hasB = sent.indexOf(bKey) >= 0;
     if (!hasA && !hasB) { continue; }
-    pts = strongWords.test(sent) ? 2 : 1;
+    pts = STRONG.test(sent) ? 2 : 1;
     if (hasA && !hasB) { aScore += pts; }
     else if (hasB && !hasA) { bScore += pts; }
-    else {
-      if (sent.indexOf(aKey) > sent.indexOf(bKey)) { aScore += 0.5; }
-      else { bScore += 0.5; }
-    }
+    else { if (sent.indexOf(aKey) > sent.indexOf(bKey)) { aScore += 0.5; } else { bScore += 0.5; } }
   }
   if (aScore === 0 && bScore === 0) { return null; }
-  var diff = aScore - bScore;
-  if (diff > 2)  { return { pA: 63, draw: 14, pB: 23 }; }
-  if (diff > 0)  { return { pA: 52, draw: 22, pB: 26 }; }
-  if (diff === 0){ return { pA: 38, draw: 24, pB: 38 }; }
-  if (diff > -3) { return { pA: 26, draw: 22, pB: 52 }; }
-  return { pA: 23, draw: 14, pB: 63 };
+  var totalS = aScore + bScore;
+  var prop = aScore / totalS;
+  var absDiff = aScore - bScore; if (absDiff < 0) { absDiff = -absDiff; }
+  var confidence = absDiff / totalS;
+  var drawQ = Math.round(28 - confidence * 16);
+  var pA = clampVal(Math.round(prop * (100 - drawQ)), 12, 74);
+  var pB = clampVal(100 - drawQ - pA, 12, 74);
+  drawQ = Math.max(8, 100 - pA - pB);
+  return { pA: pA, draw: drawQ, pB: pB };
 }
 
 function extractProbabilities(text, tA, tB) {
   var clean = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/\n/g, ' ');
+  var lower = clean.toLowerCase();
+  var aKey = tA.toLowerCase();
+  var bKey = tB.toLowerCase();
 
+  /* Strategy 1: explicit probability % near team name */
   var pA = findExplicitPct(clean, tA);
   var pB = findExplicitPct(clean, tB);
-
-  if (pA === null || pB === null) {
-    var predIdx = -1;
-    var predMarkers = ['prediction', 'verdict', 'conclusion', 'based on the data', 'based on this data', 'in summary', 'overall assessment'];
-    var pi, marker;
-    for (pi = 0; pi < predMarkers.length; pi++) {
-      marker = clean.toLowerCase().indexOf(predMarkers[pi]);
-      if (marker >= 0) { predIdx = marker; break; }
-    }
-    var source = predIdx >= 0 ? clean.slice(predIdx) : '';
-    if (source) {
-      var allPcts = [];
-      var pctRe = /(\d{1,3})\s*%/g;
-      var pm;
-      while ((pm = pctRe.exec(source)) !== null) {
-        var n = parseInt(pm[1], 10);
-        if (n >= 1 && n <= 99) { allPcts.push(n); }
-      }
-      var found = false;
-      var i, j, rem;
-      for (i = 0; i < allPcts.length - 1 && !found; i++) {
-        for (j = i + 1; j < allPcts.length && !found; j++) {
-          rem = 100 - allPcts[i] - allPcts[j];
-          if (rem >= 0 && rem <= 40) {
-            if (pA === null) { pA = allPcts[i]; }
-            if (pB === null) { pB = allPcts[j]; }
-            found = true;
-          }
-        }
-      }
-    }
-  }
-
   if (pA !== null && pB !== null) {
-    pA = Math.min(Math.max(pA, 1), 98);
-    pB = Math.min(Math.max(pB, 1), 98);
+    pA = clampVal(pA, 1, 98); pB = clampVal(pB, 1, 98);
     if (pA + pB > 100) { var sc = 100 / (pA + pB); pA = Math.round(pA * sc); pB = 100 - pA; }
     return { pA: pA, draw: Math.max(0, 100 - pA - pB), pB: pB };
   }
 
-  return extractQualitative(clean, tA, tB);
+  /* Strategy 2: scan prediction paragraph for % trio */
+  var predMarkers = ['prediction', 'verdict', 'conclusion', 'based on the data', 'based on this data', 'in summary', 'overall assessment'];
+  var predIdx = -1;
+  var pi, idx;
+  for (pi = 0; pi < predMarkers.length; pi++) {
+    idx = lower.indexOf(predMarkers[pi]);
+    if (idx >= 0) { predIdx = idx; break; }
+  }
+  if (predIdx >= 0) {
+    var source = clean.slice(predIdx);
+    var allPcts = [];
+    var pctRe = /(\d{1,3})\s*%/g;
+    var pm;
+    while ((pm = pctRe.exec(source)) !== null) {
+      var n = parseInt(pm[1], 10);
+      if (n >= 1 && n <= 99) { allPcts.push(n); }
+    }
+    var found = false;
+    var i, j, rem;
+    for (i = 0; i < allPcts.length - 1 && !found; i++) {
+      for (j = i + 1; j < allPcts.length && !found; j++) {
+        rem = 100 - allPcts[i] - allPcts[j];
+        if (rem >= 0 && rem <= 40) {
+          pA = allPcts[i]; pB = allPcts[j]; found = true;
+        }
+      }
+    }
+    if (found) {
+      pA = clampVal(pA, 1, 98); pB = clampVal(pB, 1, 98);
+      if (pA + pB > 100) { var sc2 = 100 / (pA + pB); pA = Math.round(pA * sc2); pB = 100 - pA; }
+      return { pA: pA, draw: Math.max(0, 100 - pA - pB), pB: pB };
+    }
+  }
+
+  /* Strategy 3: ELO formula */
+  var eloResult = tryEloProb(lower, aKey, bKey);
+  if (eloResult) { return eloResult; }
+
+  /* Strategy 4: form win-rate ratio */
+  var formResult = tryFormRateProb(lower, aKey, bKey);
+  if (formResult) { return formResult; }
+
+  /* Strategy 5: qualitative scoring */
+  return tryQualitativeProb(lower, aKey, bKey);
 }
 
 function tryUpdateDonut(userMsg, botResp) {
@@ -866,13 +829,8 @@ function tryUpdateDonut(userMsg, botResp) {
   else { renderPredDonutPending(teams.tA, teams.tB); }
 }
 
-inputEl.addEventListener('input', function() {
-  this.style.height = 'auto';
-  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-});
-inputEl.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});
+inputEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
+inputEl.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 </script>
 </body>
 </html>
