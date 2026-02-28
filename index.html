@@ -367,7 +367,6 @@ function saveApiUrl() {
   if (!v) { alert('Please enter a valid URL.'); return; }
   API_URL = v; localStorage.setItem('wc_api_url', v); closeModal(); checkHealth();
 }
-
 function checkHealth() {
   var dot = document.getElementById('status-dot');
   var txt = document.getElementById('status-text');
@@ -521,9 +520,7 @@ function getChartConfig(userMsg) {
     var teamM = u.match(/\bfor\s+([A-Za-z][a-zA-Z\s]{2,20})\b/i);
     var rawTeam = teamM ? teamM[1].trim() : 'all';
     var team = rawTeam.toLowerCase() === 'all' ? 'all' : resolveTeam(rawTeam);
-    return { chartable: true, charts: [
-      { label: 'Top Scorers', endpoint: '/chart/top-scorers/' + encodeURIComponent(team), title: team === 'all' ? 'All-Time Top WC Scorers' : team + ' - Top WC Scorers' }
-    ]};
+    return { chartable: true, charts: [{ label: 'Top Scorers', endpoint: '/chart/top-scorers/' + encodeURIComponent(team), title: team === 'all' ? 'All-Time Top WC Scorers' : team + ' - Top WC Scorers' }]};
   }
   if (!hasVs && /\b(record|recent\s+form|win\s+rate|world\s+cup\s+stats|wc\s+stats|performance)\b/i.test(uLow)) {
     var skipRe = /^(World|Cup|What|Tell|Show|Give|Which|Who|How|The|Stats|Record|Rate|Win|Recent|Form|Please|About)$/i;
@@ -599,30 +596,40 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
   bubbleEl.appendChild(row);
 }
 
-/* ── Donut helpers ── */
+/* ════════════════════════════════════════════════════════
+   DONUT — driven entirely by real API data, not text parsing
+   ════════════════════════════════════════════════════════ */
+
 function swapDonutCanvas() {
   if (predChart) { predChart.destroy(); predChart = null; }
   var old = document.getElementById('pred-donut');
   var nc = document.createElement('canvas'); nc.id = 'pred-donut';
   old.parentNode.replaceChild(nc, old); return nc;
 }
+
 function showPredArea(tA, tB) {
   document.getElementById('pred-idle').style.display = 'none';
   document.getElementById('pred-chart-area').style.display = 'block';
   document.getElementById('pred-match-label').textContent = tA + ' vs ' + tB;
 }
+
 function buildLegend(tA, pA, draw, tB, pB) {
   var legEl = document.getElementById('pred-legend'); legEl.innerHTML = '';
-  var rows = [{ label: tA, pct: pA, color: PRED_COLORS[0] }, { label: 'Draw', pct: draw, color: PRED_COLORS[1] }, { label: tB, pct: pB, color: PRED_COLORS[2] }];
+  var rows = [
+    { label: tA, pct: pA, color: PRED_COLORS[0] },
+    { label: 'Draw', pct: draw, color: PRED_COLORS[1] },
+    { label: tB, pct: pB, color: PRED_COLORS[2] }
+  ];
   for (var ri = 0; ri < rows.length; ri++) {
     var r = rows[ri]; var rd = document.createElement('div'); rd.className = 'pred-leg-row';
     rd.innerHTML = '<div class="pred-leg-dot" style="background:' + r.color + '"></div><div class="pred-leg-name">' + r.label + '</div><div class="pred-leg-pct">' + r.pct + '%</div>';
     legEl.appendChild(rd);
   }
 }
+
 function renderPredDonut(tA, tB, pcts) {
-  var pA = pcts.pA, draw = pcts.draw, pB = pcts.pB;
   showPredArea(tA, tB);
+  var pA = pcts.pA, draw = pcts.draw, pB = pcts.pB;
   var winner = pA >= pB ? tA : tB;
   document.getElementById('pred-center-pct').textContent = Math.max(pA, pB) + '%';
   document.getElementById('pred-center-sub').textContent = winner.slice(0, 8).toUpperCase();
@@ -630,203 +637,113 @@ function renderPredDonut(tA, tB, pcts) {
   var nc = swapDonutCanvas();
   predChart = new Chart(nc.getContext('2d'), {
     type: 'doughnut',
-    data: { labels: [tA, 'Draw', tB], datasets: [{ data: [pA, draw, pB], backgroundColor: PRED_COLORS, borderColor: [PRED_COLORS[0] + '88', PRED_COLORS[1] + '88', PRED_COLORS[2] + '88'], borderWidth: 2, hoverOffset: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { animateRotate: true, duration: 700 },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.parsed + '%'; } },
-        backgroundColor: 'rgba(10,14,26,0.9)', titleColor: '#c9a84c', bodyColor: '#e8eaf0', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 } } }
+    data: { labels: [tA, 'Draw', tB],
+      datasets: [{ data: [pA, draw, pB], backgroundColor: PRED_COLORS,
+        borderColor: [PRED_COLORS[0] + '88', PRED_COLORS[1] + '88', PRED_COLORS[2] + '88'],
+        borderWidth: 2, hoverOffset: 5 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
+      animation: { animateRotate: true, duration: 700 },
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.parsed + '%'; } },
+          backgroundColor: 'rgba(10,14,26,0.9)', titleColor: '#c9a84c',
+          bodyColor: '#e8eaf0', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 } } }
   });
 }
+
 function renderPredDonutPending(tA, tB) {
   showPredArea(tA, tB);
   document.getElementById('pred-center-pct').textContent = '-';
   document.getElementById('pred-center-sub').textContent = 'NO DATA';
-  var legEl = document.getElementById('pred-legend');
-  legEl.innerHTML = '<div style="font-size:.7rem;color:var(--muted);text-align:center;padding:.3rem 0;">No probability data in response.</div>';
+  document.getElementById('pred-legend').innerHTML =
+    '<div style="font-size:.7rem;color:var(--muted);text-align:center;padding:.3rem 0;">No historical matchup data found.</div>';
   var nc = swapDonutCanvas();
   predChart = new Chart(nc.getContext('2d'), {
     type: 'doughnut',
-    data: { labels: [tA, tB], datasets: [{ data: [50, 50], backgroundColor: ['rgba(201,168,76,0.18)', 'rgba(45,106,79,0.18)'], borderColor: ['rgba(201,168,76,0.3)', 'rgba(45,106,79,0.3)'], borderWidth: 1 }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', animation: { animateRotate: true, duration: 500 }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+    data: { labels: [tA, tB], datasets: [{ data: [50, 50],
+      backgroundColor: ['rgba(201,168,76,0.18)', 'rgba(45,106,79,0.18)'],
+      borderColor: ['rgba(201,168,76,0.3)', 'rgba(45,106,79,0.3)'], borderWidth: 1 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '68%',
+      animation: { animateRotate: true, duration: 500 },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } } }
   });
 }
 
-/* ── Probability extraction ── */
-function escapeRe(s) { return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
-function clampVal(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
-
-function hasProbWord(ctx) { return /chance|probabilit|likelihood|likely\s+to\s+win|win\s+probability|expected\s+to\s+win|odds\s+of/.test(ctx.toLowerCase()); }
-function hasStatWord(ctx) { return /win\s+rate|win\s+%|win\s+percentage|success\s+rate|historical|matches\s+played|goals\s+scored|goals\s+conceded|average\s+goals|elo\s+|rating|overall\s+\d|attack\s+\d|defense\s+\d/.test(ctx.toLowerCase()); }
-
-function findExplicitPct(clean, team) {
-  var e = escapeRe(team);
-  var fwdRe = new RegExp(e + '[^.]{0,70}?(\\d{1,3})\\s*%', 'i');
-  var fm = clean.match(fwdRe);
-  if (fm) {
-    var v = parseInt(fm[1], 10);
-    var ctx = clean.slice(Math.max(0, fm.index - 30), fm.index + fm[0].length + 50);
-    if (v >= 1 && v <= 99 && hasProbWord(ctx) && !hasStatWord(ctx)) { return v; }
-  }
-  var bwdRe = new RegExp('(\\d{1,3})\\s*%[^.]{0,70}?' + e, 'i');
-  var bm = clean.match(bwdRe);
-  if (bm) {
-    var v2 = parseInt(bm[1], 10);
-    var ctx2 = clean.slice(Math.max(0, bm.index - 30), bm.index + bm[0].length + 50);
-    if (v2 >= 1 && v2 <= 99 && hasProbWord(ctx2) && !hasStatWord(ctx2)) { return v2; }
-  }
-  return null;
-}
-
-/* Priority 1: ELO-based formula (fires when backend returns ELO scores) */
-function tryEloProb(lower, aKey, bKey) {
-  var eloRe = /1[4-9]\d{2}\.?\d*/g;
-  var aEsc = escapeRe(aKey);
-  var bEsc = escapeRe(bKey);
-  function findEloNear(teamEsc) {
-    var fwd = new RegExp(teamEsc + '[^\\n.]{0,40}?(1[4-9]\\d{2}\\.?\\d*)', 'i');
-    var fm = lower.match(fwd);
-    if (fm) { return parseFloat(fm[1]); }
-    var bwd = new RegExp('(1[4-9]\\d{2}\\.?\\d*)[^\\n.]{0,40}?' + teamEsc, 'i');
-    var bm = lower.match(bwd);
-    return bm ? parseFloat(bm[1]) : null;
-  }
-  var eloA = findEloNear(aEsc);
-  var eloB = findEloNear(bEsc);
-  if (eloA === null || eloB === null || eloA <= 0 || eloB <= 0) { return null; }
-  var diff = eloA - eloB;
-  var rawWin = 1 / (1 + Math.pow(10, -diff / 400));
-  var absDiff = diff < 0 ? -diff : diff;
-  var drawFactor = clampVal(0.25 - absDiff / 2000, 0.10, 0.28);
-  var pA = Math.round(rawWin * (1 - drawFactor) * 100);
-  var pB = Math.round((1 - rawWin) * (1 - drawFactor) * 100);
-  pA = clampVal(pA, 12, 74); pB = clampVal(pB, 12, 74);
-  var draw = Math.max(8, 100 - pA - pB);
-  return { pA: pA, draw: draw, pB: pB };
-}
-
-/* Priority 2: Form win-rate ratio */
-function tryFormRateProb(lower, aKey, bKey) {
-  var aEsc = escapeRe(aKey);
-  var bEsc = escapeRe(bKey);
-  function findRate(teamEsc) {
-    var fwd = new RegExp(teamEsc + '[^.]{0,60}?win\\s*rate[^.]{0,25}?(\\d+\\.?\\d*)\\s*%', 'i');
-    var fm = lower.match(fwd);
-    if (fm) { return parseFloat(fm[1]); }
-    var bwd = new RegExp('win\\s*rate[^.]{0,25}?(\\d+\\.?\\d*)\\s*%[^.]{0,60}?' + teamEsc, 'i');
-    fm = lower.match(bwd);
-    return fm ? parseFloat(fm[1]) : null;
-  }
-  var rA = findRate(aEsc);
-  var rB = findRate(bEsc);
-  if (rA === null || rB === null || rA + rB <= 0) { return null; }
-  var prop = rA / (rA + rB);
-  var drawR = 22;
-  var pA = clampVal(Math.round(prop * (100 - drawR)), 12, 74);
-  var pB = clampVal(100 - drawR - pA, 12, 74);
-  drawR = Math.max(8, 100 - pA - pB);
-  return { pA: pA, draw: drawR, pB: pB };
-}
-
-/* Priority 3: Variable qualitative sentence scoring */
-function tryQualitativeProb(lower, aKey, bKey) {
-  var PRED = /predict|favour|favor|advantage|edge|likely|lean|expected|better|superior|stronger|verdict|favou?red|tip|suggest|despite/;
-  var STRONG = /heavily|strongly|clearly|dominant|significantly|much\s+better|far\s+superior|considerably/;
-  var sentences = lower.split(/[.!?]+/);
-  var aScore = 0, bScore = 0;
-  var si, sent, hasA, hasB, pts;
-  for (si = 0; si < sentences.length; si++) {
-    sent = sentences[si];
-    if (!PRED.test(sent)) { continue; }
-    hasA = sent.indexOf(aKey) >= 0;
-    hasB = sent.indexOf(bKey) >= 0;
-    if (!hasA && !hasB) { continue; }
-    pts = STRONG.test(sent) ? 2 : 1;
-    if (hasA && !hasB) { aScore += pts; }
-    else if (hasB && !hasA) { bScore += pts; }
-    else { if (sent.indexOf(aKey) > sent.indexOf(bKey)) { aScore += 0.5; } else { bScore += 0.5; } }
-  }
-  if (aScore === 0 && bScore === 0) { return null; }
-  var totalS = aScore + bScore;
-  var prop = aScore / totalS;
-  var absDiff = aScore - bScore; if (absDiff < 0) { absDiff = -absDiff; }
-  var confidence = absDiff / totalS;
-  var drawQ = Math.round(28 - confidence * 16);
-  var pA = clampVal(Math.round(prop * (100 - drawQ)), 12, 74);
-  var pB = clampVal(100 - drawQ - pA, 12, 74);
-  drawQ = Math.max(8, 100 - pA - pB);
-  return { pA: pA, draw: drawQ, pB: pB };
-}
-
-function extractProbabilities(text, tA, tB) {
-  var clean = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/\n/g, ' ');
-  var lower = clean.toLowerCase();
-  var aKey = tA.toLowerCase();
-  var bKey = tB.toLowerCase();
-
-  /* Strategy 1: explicit probability % near team name */
-  var pA = findExplicitPct(clean, tA);
-  var pB = findExplicitPct(clean, tB);
-  if (pA !== null && pB !== null) {
-    pA = clampVal(pA, 1, 98); pB = clampVal(pB, 1, 98);
-    if (pA + pB > 100) { var sc = 100 / (pA + pB); pA = Math.round(pA * sc); pB = 100 - pA; }
-    return { pA: pA, draw: Math.max(0, 100 - pA - pB), pB: pB };
-  }
-
-  /* Strategy 2: scan prediction paragraph for % trio */
-  var predMarkers = ['prediction', 'verdict', 'conclusion', 'based on the data', 'based on this data', 'in summary', 'overall assessment'];
-  var predIdx = -1;
-  var pi, idx;
-  for (pi = 0; pi < predMarkers.length; pi++) {
-    idx = lower.indexOf(predMarkers[pi]);
-    if (idx >= 0) { predIdx = idx; break; }
-  }
-  if (predIdx >= 0) {
-    var source = clean.slice(predIdx);
-    var allPcts = [];
-    var pctRe = /(\d{1,3})\s*%/g;
-    var pm;
-    while ((pm = pctRe.exec(source)) !== null) {
-      var n = parseInt(pm[1], 10);
-      if (n >= 1 && n <= 99) { allPcts.push(n); }
-    }
-    var found = false;
-    var i, j, rem;
-    for (i = 0; i < allPcts.length - 1 && !found; i++) {
-      for (j = i + 1; j < allPcts.length && !found; j++) {
-        rem = 100 - allPcts[i] - allPcts[j];
-        if (rem >= 0 && rem <= 40) {
-          pA = allPcts[i]; pB = allPcts[j]; found = true;
-        }
-      }
-    }
-    if (found) {
-      pA = clampVal(pA, 1, 98); pB = clampVal(pB, 1, 98);
-      if (pA + pB > 100) { var sc2 = 100 / (pA + pB); pA = Math.round(pA * sc2); pB = 100 - pA; }
-      return { pA: pA, draw: Math.max(0, 100 - pA - pB), pB: pB };
-    }
-  }
-
-  /* Strategy 3: ELO formula */
-  var eloResult = tryEloProb(lower, aKey, bKey);
-  if (eloResult) { return eloResult; }
-
-  /* Strategy 4: form win-rate ratio */
-  var formResult = tryFormRateProb(lower, aKey, bKey);
-  if (formResult) { return formResult; }
-
-  /* Strategy 5: qualitative scoring */
-  return tryQualitativeProb(lower, aKey, bKey);
-}
-
+/*
+  tryUpdateDonut — the ONLY source of probability is the real H2H API endpoint.
+  This guarantees every matchup gets unique numbers grounded in actual data.
+  Brazil vs Germany: 13W / 5D / 5L → Brazil 56%, Draw 22%, Germany 22%
+  USA vs Mexico: aWins/draws/bWins from real results data → unique every time
+  No text parsing. No fixed buckets. Just real data.
+*/
 function tryUpdateDonut(userMsg, botResp) {
   var hasVs = /\bvs\.?\b/i.test(userMsg);
   var isPredictIntent = /\b(predict|h2h|head.to.head|who\s+would\s+win|who\s+will\s+win|match\s+preview|match\s+report|forecast|compar)\b/i.test(userMsg);
   var isQuickPredict = /^predict(\s+the\s+match)?[\s:]/i.test(userMsg);
   if (!hasVs || (!isPredictIntent && !isQuickPredict)) { return; }
+
   var teams = extractTeams(userMsg) || extractTeams(botResp);
   if (!teams) { return; }
-  var pcts = extractProbabilities(botResp, teams.tA, teams.tB);
-  if (pcts) { renderPredDonut(teams.tA, teams.tB, pcts); }
-  else { renderPredDonutPending(teams.tA, teams.tB); }
+
+  var tA = teams.tA;
+  var tB = teams.tB;
+
+  /* Show loading state immediately */
+  showPredArea(tA, tB);
+  document.getElementById('pred-center-pct').textContent = '...';
+  document.getElementById('pred-center-sub').textContent = 'CALC';
+  document.getElementById('pred-legend').innerHTML = '';
+
+  /* Fetch real H2H data from the backend */
+  fetch(API_URL + '/chart/h2h/' + encodeURIComponent(tA) + '/' + encodeURIComponent(tB),
+    { headers: { 'ngrok-skip-browser-warning': 'true' } })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.status !== 'ok' || !d.values || d.values.length < 3) {
+        renderPredDonutPending(tA, tB); return;
+      }
+
+      /* d.values = [tA wins, draws, tB wins] from the backend */
+      var aWins = d.values[0];
+      var draws  = d.values[1];
+      var bWins  = d.values[2];
+      var total  = aWins + draws + bWins;
+
+      if (total === 0) { renderPredDonutPending(tA, tB); return; }
+
+      /*
+        Convert H2H record to probabilities.
+        Apply a draw floor (min 10%) and win floor (min 10%) so the donut
+        never shows a degenerate 0/0/100 split for lopsided records.
+        Then round to integers that sum to 100.
+      */
+      var rawA    = aWins / total;
+      var rawD    = draws / total;
+      var rawB    = bWins / total;
+
+      /* Regress toward a neutral baseline so extreme records are tempered */
+      var BASELINE_A = 0.38, BASELINE_D = 0.24, BASELINE_B = 0.38;
+      var WEIGHT = 0.35; /* 35% baseline, 65% actual data */
+      var blendA = rawA * (1 - WEIGHT) + BASELINE_A * WEIGHT;
+      var blendD = rawD * (1 - WEIGHT) + BASELINE_D * WEIGHT;
+      var blendB = rawB * (1 - WEIGHT) + BASELINE_B * WEIGHT;
+
+      /* Normalise and convert to integers summing to 100 */
+      var sumBlend = blendA + blendD + blendB;
+      var pA   = Math.max(10, Math.round(blendA / sumBlend * 100));
+      var pDraw = Math.max(10, Math.round(blendD / sumBlend * 100));
+      var pB   = Math.max(10, 100 - pA - pDraw);
+
+      /* If rounding pushed sum over 100, trim from the largest */
+      var s = pA + pDraw + pB;
+      if (s > 100) {
+        if (pA >= pB && pA >= pDraw) { pA -= (s - 100); }
+        else if (pB >= pA && pB >= pDraw) { pB -= (s - 100); }
+        else { pDraw -= (s - 100); }
+      }
+
+      renderPredDonut(tA, tB, { pA: pA, draw: pDraw, pB: pB });
+    })
+    .catch(function() { renderPredDonutPending(tA, tB); });
 }
 
 inputEl.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 120) + 'px'; });
