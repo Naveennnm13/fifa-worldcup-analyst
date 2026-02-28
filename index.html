@@ -368,9 +368,7 @@ function openModal() {
   document.getElementById('api-url-input').value = API_URL;
   document.getElementById('modal').classList.add('open');
 }
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
 function saveApiUrl() {
   var v = document.getElementById('api-url-input').value.trim().replace(/\/$/, '');
   if (!v) { alert('Please enter a valid URL.'); return; }
@@ -488,20 +486,19 @@ function safeRenderChart(data, wrapId) {
   var ctx = canvas.getContext('2d');
   var noLegend = { legend: { display: false } };
   var gridFaint = { color: 'rgba(255,255,255,0.05)' };
-  var tickX = { color: '#7a8a9a' };
-  var tickY = { color: '#7a8a9a' };
+  var tickMuted = { color: '#7a8a9a' };
   var chart = null;
   if (data.type === 'bar') {
     chart = new Chart(ctx, { type: 'bar',
       data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: data.colors, borderRadius: 6, borderSkipped: false }] },
       options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, plugins: noLegend,
-        scales: { x: { ticks: tickX, grid: gridFaint }, y: { ticks: tickY, grid: gridFaint } } }
+        scales: { x: { ticks: tickMuted, grid: gridFaint }, y: { ticks: tickMuted, grid: gridFaint } } }
     });
   } else if (data.type === 'bar_h') {
     chart = new Chart(ctx, { type: 'bar',
       data: { labels: data.labels, datasets: [{ data: data.values, backgroundColor: data.colors, borderRadius: 4, borderSkipped: false }] },
       options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 }, indexAxis: 'y', plugins: noLegend,
-        scales: { x: { ticks: tickX, grid: gridFaint }, y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } } } }
+        scales: { x: { ticks: tickMuted, grid: gridFaint }, y: { ticks: { color: '#e8eaf0', font: { size: 10 } }, grid: { display: false } } } }
     });
   } else if (data.type === 'line') {
     chart = new Chart(ctx, { type: 'line',
@@ -510,7 +507,7 @@ function safeRenderChart(data, wrapId) {
       })},
       options: { responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
         plugins: { legend: { labels: { color: '#e8eaf0', font: { family: 'Inter', size: 11 } } } },
-        scales: { x: { ticks: { color: '#7a8a9a', maxTicksLimit: 6, font: { size: 9 } }, grid: gridFaint }, y: { ticks: tickY, grid: gridFaint } } }
+        scales: { x: { ticks: { color: '#7a8a9a', maxTicksLimit: 6, font: { size: 9 } }, grid: gridFaint }, y: { ticks: tickMuted, grid: gridFaint } } }
     });
   } else if (data.type === 'radar') {
     chart = new Chart(ctx, { type: 'radar',
@@ -655,96 +652,7 @@ function attachChartBtns(userMsg, bubbleEl, msgDiv) {
   bubbleEl.appendChild(row);
 }
 
-/* ── Prediction donut ───────────────────────────────────────────────────────
-   Gate on USER intent (vs + predict keyword).
-   Then extract probabilities from bot response with NO context requirement —
-   any % near a team name is valid. This is the key fix: the old code required
-   "win/chance/probability" within 50 chars of the %, which silently failed for
-   responses formatted as "Germany: 52%" or bullet-point style outputs.
-   ───────────────────────────────────────────────────────────────────────── */
-function tryUpdateDonut(userMsg, botResp) {
-  var hasVs = /\bvs\.?\b/i.test(userMsg);
-  var isPredictIntent = /\b(predict|h2h|head.to.head|who\s+would\s+win|who\s+will\s+win|match\s+preview|match\s+report|forecast|compar)\b/i.test(userMsg);
-  var isQuickPredict = /^predict(\s+the\s+match)?[\s:]/i.test(userMsg);
-  if (!hasVs || (!isPredictIntent && !isQuickPredict)) { return; }
-  var teams = extractTeams(userMsg) || extractTeams(botResp);
-  if (!teams) { return; }
-  var pcts = extractProbabilities(botResp, teams.tA, teams.tB);
-  if (pcts) { renderPredDonut(teams.tA, teams.tB, pcts); }
-  else { renderPredDonutPending(teams.tA, teams.tB); }
-}
-
-function extractProbabilities(text, tA, tB) {
-  /* Strip markdown bold markers so "**Germany**" becomes "Germany" */
-  var clean = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/\n/g, ' ');
-
-  function escRe(s) { return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); }
-
-  /* Strategy 1 — find any % within 80 chars of a team name, no context gate */
-  function findTeamPct(team) {
-    var esc = escRe(team);
-    /* Forward: team name then % */
-    var fwdRe = new RegExp(esc + '[^.]{0,80}?(\\d{1,3})\\s*%', 'i');
-    var fwdM = clean.match(fwdRe);
-    if (fwdM) {
-      var v = parseInt(fwdM[1], 10);
-      if (v >= 1 && v <= 99) { return v; }
-    }
-    /* Backward: % then team name */
-    var bwdRe = new RegExp('(\\d{1,3})\\s*%[^.]{0,80}?' + esc, 'i');
-    var bwdM = clean.match(bwdRe);
-    if (bwdM) {
-      var v2 = parseInt(bwdM[1], 10);
-      if (v2 >= 1 && v2 <= 99) { return v2; }
-    }
-    return null;
-  }
-
-  var pA = findTeamPct(tA);
-  var pB = findTeamPct(tB);
-
-  /* Strategy 2 — scan all % values and find a pair whose remainder (draw) is 0-40 */
-  if (pA === null || pB === null) {
-    var allPcts = [];
-    var pctRe = /(\d{1,3})\s*%/g;
-    var pm;
-    while ((pm = pctRe.exec(clean)) !== null) {
-      var n = parseInt(pm[1], 10);
-      if (n >= 1 && n <= 99) { allPcts.push(n); }
-    }
-    var found = false;
-    var i, j;
-    for (i = 0; i < allPcts.length - 1 && !found; i++) {
-      for (j = i + 1; j < allPcts.length && !found; j++) {
-        var rem = 100 - allPcts[i] - allPcts[j];
-        if (rem >= 0 && rem <= 40) {
-          if (pA === null) { pA = allPcts[i]; }
-          if (pB === null) { pB = allPcts[j]; }
-          found = true;
-        }
-      }
-    }
-    /* Strategy 3 — use two largest plausible values */
-    if (!found && allPcts.length >= 2) {
-      var sorted = allPcts.slice().sort(function(a, b) { return b - a; });
-      if (sorted[0] >= 20 && sorted[1] >= 10 && sorted[0] + sorted[1] <= 100) {
-        if (pA === null) { pA = sorted[0]; }
-        if (pB === null) { pB = sorted[1]; }
-      }
-    }
-  }
-
-  if (pA === null || pB === null) { return null; }
-  pA = Math.min(Math.max(pA, 1), 98);
-  pB = Math.min(Math.max(pB, 1), 98);
-  if (pA + pB > 100) {
-    var scale = 100 / (pA + pB);
-    pA = Math.round(pA * scale);
-    pB = 100 - pA;
-  }
-  return { pA: pA, draw: Math.max(0, 100 - pA - pB), pB: pB };
-}
-
+/* ── Donut helpers ────────────────────────────────────────────── */
 function swapDonutCanvas() {
   if (predChart) { predChart.destroy(); predChart = null; }
   var old = document.getElementById('pred-donut');
@@ -760,12 +668,7 @@ function showPredArea(tA, tB) {
   document.getElementById('pred-match-label').textContent = tA + ' vs ' + tB;
 }
 
-function renderPredDonut(tA, tB, pcts) {
-  var pA = pcts.pA, draw = pcts.draw, pB = pcts.pB;
-  showPredArea(tA, tB);
-  var winner = pA >= pB ? tA : tB;
-  document.getElementById('pred-center-pct').textContent = Math.max(pA, pB) + '%';
-  document.getElementById('pred-center-sub').textContent = winner.slice(0, 8).toUpperCase();
+function buildLegend(tA, pA, draw, tB, pB) {
   var legEl = document.getElementById('pred-legend');
   legEl.innerHTML = '';
   var rows = [
@@ -773,7 +676,8 @@ function renderPredDonut(tA, tB, pcts) {
     { label: 'Draw', pct: draw, color: PRED_COLORS[1] },
     { label: tB, pct: pB, color: PRED_COLORS[2] }
   ];
-  for (var ri = 0; ri < rows.length; ri++) {
+  var ri;
+  for (ri = 0; ri < rows.length; ri++) {
     var r = rows[ri];
     var rd = document.createElement('div');
     rd.className = 'pred-leg-row';
@@ -782,6 +686,15 @@ function renderPredDonut(tA, tB, pcts) {
       '<div class="pred-leg-pct">' + r.pct + '%</div>';
     legEl.appendChild(rd);
   }
+}
+
+function renderPredDonut(tA, tB, pcts) {
+  var pA = pcts.pA, draw = pcts.draw, pB = pcts.pB;
+  showPredArea(tA, tB);
+  var winner = pA >= pB ? tA : tB;
+  document.getElementById('pred-center-pct').textContent = Math.max(pA, pB) + '%';
+  document.getElementById('pred-center-sub').textContent = winner.slice(0, 8).toUpperCase();
+  buildLegend(tA, pA, draw, tB, pB);
   var nc = swapDonutCanvas();
   predChart = new Chart(nc.getContext('2d'), {
     type: 'doughnut',
@@ -815,6 +728,142 @@ function renderPredDonutPending(tA, tB) {
       animation: { animateRotate: true, duration: 500 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } } }
   });
+}
+
+/* ── Probability extraction ───────────────────────────────────────
+   The bot response has two kinds of percentages:
+   (A) Stat %  e.g. "Win Rate: 60%", "ELO difference: 22%"  => IGNORE
+   (B) Prob %  e.g. "France has a 57% chance of winning"    => USE
+
+   Strategy 1: find % that is preceded or followed by explicit
+               probability words (chance, probability, likelihood,
+               odds). Stat-context words nearby disqualify it.
+   Strategy 2: scan only the Prediction paragraph for a % trio.
+   Strategy 3: qualitative sentence scoring as final fallback.
+   ──────────────────────────────────────────────────────────────── */
+
+function escapeRegex(s) {
+  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
+function hasProbWord(ctx) {
+  return /chance|probabilit|likelihood|likely\s+to\s+win|win\s+probability|expected\s+to\s+win|odds\s+of/.test(ctx.toLowerCase());
+}
+
+function hasStatWord(ctx) {
+  return /win\s+rate|win\s+%|win\s+percentage|success\s+rate|historical|matches\s+played|goals\s+scored|goals\s+conceded|average\s+goals|elo\s+|rating|overall\s+\d|attack\s+\d|defense\s+\d/.test(ctx.toLowerCase());
+}
+
+function findExplicitPct(clean, team) {
+  var e = escapeRegex(team);
+  var fwdRe = new RegExp(e + '[^.]{0,70}?(\\d{1,3})\\s*%', 'i');
+  var fm = clean.match(fwdRe);
+  if (fm) {
+    var v = parseInt(fm[1], 10);
+    var ctx = clean.slice(Math.max(0, fm.index - 30), fm.index + fm[0].length + 50);
+    if (v >= 1 && v <= 99 && hasProbWord(ctx) && !hasStatWord(ctx)) { return v; }
+  }
+  var bwdRe = new RegExp('(\\d{1,3})\\s*%[^.]{0,70}?' + e, 'i');
+  var bm = clean.match(bwdRe);
+  if (bm) {
+    var v2 = parseInt(bm[1], 10);
+    var ctx2 = clean.slice(Math.max(0, bm.index - 30), bm.index + bm[0].length + 50);
+    if (v2 >= 1 && v2 <= 99 && hasProbWord(ctx2) && !hasStatWord(ctx2)) { return v2; }
+  }
+  return null;
+}
+
+function extractQualitative(clean, tA, tB) {
+  var lower = clean.toLowerCase();
+  var aKey = tA.toLowerCase();
+  var bKey = tB.toLowerCase();
+  var predWords = /predict|favour|favor|advantage|edge|likely|lean|expected|better|superior|stronger|verdict|favou?red|recommend|tip|suggest|despite/;
+  var strongWords = /heavily|strongly|clearly|dominant|significantly|much\s+better|far\s+superior|considerably|commanding/;
+  var sentences = lower.split(/[.!?]+/);
+  var aScore = 0;
+  var bScore = 0;
+  var si, sent, hasA, hasB, pts;
+  for (si = 0; si < sentences.length; si++) {
+    sent = sentences[si];
+    if (!predWords.test(sent)) { continue; }
+    hasA = sent.indexOf(aKey) >= 0;
+    hasB = sent.indexOf(bKey) >= 0;
+    if (!hasA && !hasB) { continue; }
+    pts = strongWords.test(sent) ? 2 : 1;
+    if (hasA && !hasB) { aScore += pts; }
+    else if (hasB && !hasA) { bScore += pts; }
+    else {
+      if (sent.indexOf(aKey) > sent.indexOf(bKey)) { aScore += 0.5; }
+      else { bScore += 0.5; }
+    }
+  }
+  if (aScore === 0 && bScore === 0) { return null; }
+  var diff = aScore - bScore;
+  if (diff > 2)  { return { pA: 63, draw: 14, pB: 23 }; }
+  if (diff > 0)  { return { pA: 52, draw: 22, pB: 26 }; }
+  if (diff === 0){ return { pA: 38, draw: 24, pB: 38 }; }
+  if (diff > -3) { return { pA: 26, draw: 22, pB: 52 }; }
+  return { pA: 23, draw: 14, pB: 63 };
+}
+
+function extractProbabilities(text, tA, tB) {
+  var clean = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/\n/g, ' ');
+
+  var pA = findExplicitPct(clean, tA);
+  var pB = findExplicitPct(clean, tB);
+
+  if (pA === null || pB === null) {
+    var predIdx = -1;
+    var predMarkers = ['prediction', 'verdict', 'conclusion', 'based on the data', 'based on this data', 'in summary', 'overall assessment'];
+    var pi, marker;
+    for (pi = 0; pi < predMarkers.length; pi++) {
+      marker = clean.toLowerCase().indexOf(predMarkers[pi]);
+      if (marker >= 0) { predIdx = marker; break; }
+    }
+    var source = predIdx >= 0 ? clean.slice(predIdx) : '';
+    if (source) {
+      var allPcts = [];
+      var pctRe = /(\d{1,3})\s*%/g;
+      var pm;
+      while ((pm = pctRe.exec(source)) !== null) {
+        var n = parseInt(pm[1], 10);
+        if (n >= 1 && n <= 99) { allPcts.push(n); }
+      }
+      var found = false;
+      var i, j, rem;
+      for (i = 0; i < allPcts.length - 1 && !found; i++) {
+        for (j = i + 1; j < allPcts.length && !found; j++) {
+          rem = 100 - allPcts[i] - allPcts[j];
+          if (rem >= 0 && rem <= 40) {
+            if (pA === null) { pA = allPcts[i]; }
+            if (pB === null) { pB = allPcts[j]; }
+            found = true;
+          }
+        }
+      }
+    }
+  }
+
+  if (pA !== null && pB !== null) {
+    pA = Math.min(Math.max(pA, 1), 98);
+    pB = Math.min(Math.max(pB, 1), 98);
+    if (pA + pB > 100) { var sc = 100 / (pA + pB); pA = Math.round(pA * sc); pB = 100 - pA; }
+    return { pA: pA, draw: Math.max(0, 100 - pA - pB), pB: pB };
+  }
+
+  return extractQualitative(clean, tA, tB);
+}
+
+function tryUpdateDonut(userMsg, botResp) {
+  var hasVs = /\bvs\.?\b/i.test(userMsg);
+  var isPredictIntent = /\b(predict|h2h|head.to.head|who\s+would\s+win|who\s+will\s+win|match\s+preview|match\s+report|forecast|compar)\b/i.test(userMsg);
+  var isQuickPredict = /^predict(\s+the\s+match)?[\s:]/i.test(userMsg);
+  if (!hasVs || (!isPredictIntent && !isQuickPredict)) { return; }
+  var teams = extractTeams(userMsg) || extractTeams(botResp);
+  if (!teams) { return; }
+  var pcts = extractProbabilities(botResp, teams.tA, teams.tB);
+  if (pcts) { renderPredDonut(teams.tA, teams.tB, pcts); }
+  else { renderPredDonutPending(teams.tA, teams.tB); }
 }
 
 inputEl.addEventListener('input', function() {
